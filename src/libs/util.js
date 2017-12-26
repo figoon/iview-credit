@@ -7,7 +7,7 @@ let util = {
 
 };
 util.title = function (title) {
-    title = title || 'iView admin';
+    title = title || '零售信贷管理系统';
     window.document.title = title;
 };
 
