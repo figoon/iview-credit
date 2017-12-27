@@ -1,5 +1,5 @@
 <style lang="less">
-    @import '../main.less';
+    @import '../../styles/main.less';
 </style>
 
 <template>

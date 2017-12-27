@@ -1,6 +1,3 @@
-<style lang="less">
-    @import "./main.less";
-</style>
 <template>
 	<div class="main" :class="{'main-hide-text': shrink}">
 		<div class="sidebar-menu-con" :style="{width: shrink?'60px':'200px', overflow: shrink ? 'visible' : 'auto'}">
@@ -199,3 +196,7 @@
 		}
 	};
 </script>
+
+<style lang="less">
+	@import "../styles/main.less";
+</style>
