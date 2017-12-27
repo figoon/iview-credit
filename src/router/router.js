@@ -67,6 +67,165 @@ export const otherRouter = {
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
 export const appRouter = [
 	{
+		path: '/workbench',
+		icon: 'home',
+		name: 'workbench',
+		title: '工作台',
+		component: Main,
+		children: [
+			{ 
+				path: 'daily', 
+				title: '日常工作', 
+				name: 'workbench_daily', 
+				component: resolve => { require(['@/views/workbench/daily/daily.vue'], resolve); } 
+			},
+			{
+				path: 'done', 
+				title: '已办查询', 
+				name: 'done_query', 
+				component: resolve => { require(['@/views/workbench/done/done.vue'], resolve); } 
+			}
+		]
+	},
+	{
+		path: '/customer',
+		icon: 'person-stalker',
+		name: 'customer',
+		title: '客户管理',
+		component: Main,
+		children: [
+			{ 
+				path: 'acceptance', 
+				title: '客户受理查询', 
+				name: 'customer_acceptance', 
+				component: resolve => { require(['@/views/customer/acceptance/acceptance.vue'], resolve); } 
+			},
+			{ 
+				path: 'acceptance', 
+				title: '预留位', 
+				name: 'customer_acceptance', 
+				component: resolve => { require(['@/views/customer/acceptance/acceptance.vue'], resolve); } 
+			}
+		]
+	},
+	{
+		path: '/loan',
+		icon: 'card',
+		name: 'loan',
+		title: '贷款管理',
+		component: Main,
+		children: [
+			{ 
+				path: 'acceptance', 
+				title: '贷款受理查询', 
+				name: 'loan_acceptance', 
+				component: resolve => { require(['@/views/loan/acceptance/acceptance.vue'], resolve); } 
+			},
+			{ 
+				path: 'approval', 
+				title: '审批贷款查询', 
+				name: 'loan_approval', 
+				component: resolve => { require(['@/views/loan/approval/approval.vue'], resolve); } 
+			}
+		]
+	},
+	{
+		path: '/log',
+		icon: 'bug',
+		name: 'log',
+		title: '日志管理',
+		component: Main,
+		children: [
+			{ 
+				path: 'system', 
+				title: '系统日志', 
+				name: 'log_system', 
+				component: resolve => { require(['@/views/log/system/system.vue'], resolve); } 
+			},
+			{ 
+				path: 'system', 
+				title: '预留位', 
+				name: 'log_system', 
+				component: resolve => { require(['@/views/log/system/system.vue'], resolve); } 
+			}
+		]
+	},
+	{
+		path: '/system',
+		icon: 'gear-b',
+		name: 'system',
+		title: '系统管理',
+		component: Main,
+		children: [
+			{ 
+				path: 'dictionaries', 
+				title: '字典管理', 
+				name: 'system_dictionaries', 
+				component: resolve => { require(['@/views/system/dictionaries/dictionaries.vue'], resolve); } 
+			},
+			{ 
+				path: 'dictionaries', 
+				title: '预留位', 
+				name: 'system_dictionaries', 
+				component: resolve => { require(['@/views/system/dictionaries/dictionaries.vue'], resolve); } 
+			}
+		]
+	},
+	{
+		path: '/users',
+		icon: 'person',
+		name: 'users',
+		title: '用户管理',
+		component: Main,
+		children: [
+			{ 
+				path: 'user', 
+				title: '字典管理', 
+				name: 'users_user', 
+				component: resolve => { require(['@/views/users/user/user.vue'], resolve); } 
+			},
+			{ 
+				path: 'role', 
+				title: '角色管理', 
+				name: 'users_role', 
+				component: resolve => { require(['@/views/users/role/role.vue'], resolve); } 
+			},
+			{ 
+				path: 'organization', 
+				title: '机构管理', 
+				name: 'users_organization', 
+				component: resolve => { require(['@/views/users/organization/organization.vue'], resolve); } 
+			},
+		]
+	},
+	{
+		path: '/flow',
+		icon: 'clipboard',
+		name: 'flow',
+		title: '流程管理',
+		component: Main,
+		children: [
+			{ 
+				path: 'deploy', 
+				title: '部署流程', 
+				name: 'flow_deploy', 
+				component: resolve => { require(['@/views/flow/deploy/deploy.vue'], resolve); } 
+			},
+			{ 
+				path: 'manage', 
+				title: '管理流程', 
+				name: 'flow_manage', 
+				component: resolve => { require(['@/views/flow/manage/manage.vue'], resolve); } 
+			},
+			{ 
+				path: 'ongoing', 
+				title: '进行中流程', 
+				name: 'flow_ongoing', 
+				component: resolve => { require(['@/views/flow/ongoing/ongoing.vue'], resolve); } 
+			}
+		]
+	},
+	{
 		path: '/access',
 		icon: 'key',
 		name: 'access',
