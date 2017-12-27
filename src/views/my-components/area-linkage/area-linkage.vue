@@ -1,6 +1,6 @@
 <style lang="less">
     @import './area-linkage.less';
-    @import '../../../styles/common.less';
+    @import '../../../styles/common/common.less';
 </style>
 
 <template>

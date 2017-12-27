@@ -1,5 +1,5 @@
 <style lang="less" scoped>
-    @import '../../styles/common.less';
+    @import '../../styles/common/common.less';
     @import './components/table.less';
 </style>
 
