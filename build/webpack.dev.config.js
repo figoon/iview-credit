@@ -3,9 +3,9 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const merge = require('webpack-merge');
+const proxyMiddleware = require('http-proxy-middleware');
 const webpackBaseConfig = require('./webpack.base.config.js');
 const fs = require('fs');
-const package = require('../package.json');
 
 fs.open('./build/env.js', 'w', function(err, fd) {
 	const buf = 'export default "development";';

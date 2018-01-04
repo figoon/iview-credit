@@ -1,5 +1,5 @@
 <template>
-  <div class="home-main">
+  <div class="home-main" style="display:none">
     <Row :gutter="10">
       <Col :md="24" :lg="8">
         <Row class-name="home-page-row1" :gutter="10">

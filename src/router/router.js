@@ -103,8 +103,8 @@ export const appRouter = [
 			{ 
 				path: 'acceptance', 
 				title: '预留位', 
-				name: 'customer_acceptance', 
-				component: resolve => { require(['@/views/customer/acceptance/acceptance.vue'], resolve); } 
+				name: 'customer_test', 
+				component: resolve => { require(['@/views/error-page/404.vue'], resolve); }
 			}
 		]
 	},
@@ -145,8 +145,8 @@ export const appRouter = [
 			{ 
 				path: 'system', 
 				title: '预留位', 
-				name: 'log_system', 
-				component: resolve => { require(['@/views/log/system/system.vue'], resolve); } 
+				name: 'log_test', 
+				component: resolve => { require(['@/views/error-page/404.vue'], resolve); }
 			}
 		]
 	},
@@ -166,7 +166,7 @@ export const appRouter = [
 			{ 
 				path: 'dictionaries', 
 				title: '预留位', 
-				name: 'system_dictionaries', 
+				name: 'system_test', 
 				component: resolve => { require(['@/views/system/dictionaries/dictionaries.vue'], resolve); } 
 			}
 		]
@@ -179,12 +179,6 @@ export const appRouter = [
 		component: Main,
 		children: [
 			{ 
-				path: 'user', 
-				title: '字典管理', 
-				name: 'users_user', 
-				component: resolve => { require(['@/views/users/user/user.vue'], resolve); } 
-			},
-			{ 
 				path: 'role', 
 				title: '角色管理', 
 				name: 'users_role', 
@@ -196,6 +190,12 @@ export const appRouter = [
 				name: 'users_organization', 
 				component: resolve => { require(['@/views/users/organization/organization.vue'], resolve); } 
 			},
+			{ 
+				path: 'user', 
+				title: '用户管理', 
+				name: 'users_user', 
+				component: resolve => { require(['@/views/users/user/user.vue'], resolve); } 
+			}
 		]
 	},
 	{

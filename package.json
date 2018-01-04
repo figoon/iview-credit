@@ -1,5 +1,5 @@
 {
-  "name": "iview-admin",
+  "name": "git-credit",
   "version": "1.2.3",
   "description": "a management bases on iview",
   "main": "index.js",
@@ -63,6 +63,7 @@
     "happypack": "^4.0.0",
     "html-loader": "^0.5.1",
     "html-webpack-plugin": "^2.28.0",
+    "http-proxy-middleware": "^0.17.3",
     "less": "^2.7.3",
     "less-loader": "^4.0.5",
     "semver": "^5.4.1",
