@@ -56,23 +56,46 @@ export default {
     handleSubmit () {
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
-          Cookies.set('user', this.form.userName);
-          Cookies.set('password', this.form.password);
-          this.$store.commit('setAvator', 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3448484253,3685836170&fm=27&gp=0.jpg');
-          if (this.form.userName === 'git') {
-            Cookies.set('access', 0);
-          } else {
-            Cookies.set('access', 1);
-          }
+          let obj = {
+            name: this.form.userName,
+            password: this.form.password
+          };
 
-          this.easeout = true;
-          this.zoomout = true;
-          setTimeout(() => {
-            // 进入管理页面，登录成功
-            this.$router.push({
-              name: 'home_index'
-            }); 
-          }, 1800)
+          this.$http.post('/auth/user', obj) // 将信息发送给后端
+            .then((res) => {
+              if(res.data.success){ // 如果成功
+                sessionStorage.setItem('hdl-token',res.data.token); // 用sessionStorage把token存下来
+                // 设置cookie
+                Cookies.set('user', this.form.userName);
+                Cookies.set('password', this.form.password);
+                this.$store.commit('setAvator', 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3448484253,3685836170&fm=27&gp=0.jpg');
+                // 权限测试
+                if (this.form.userName === 'git') {
+                  Cookies.set('access', 0);
+                } else {
+                  Cookies.set('access', 1);
+                }
+
+                // 登录成功，显示提示语
+                this.$Message.success('登陆成功！');
+                this.easeout = true;
+                this.zoomout = true;
+                setTimeout(() => {
+                  // 进入管理页面，登录成功
+                  this.$router.push({
+                    name: 'home_index'
+                  }); 
+                }, 1800)
+              }else{
+                this.load_data = false;
+                this.$Message.error(res.data.info); // 登录失败，显示提示语
+                sessionStorage.setItem('hdl-token',null); // 将token清空
+              }
+            }, (err) => {
+              this.$Message.error('请求错误！');
+              sessionStorage.setItem('hdl-token',null); // 将token清空
+            })
+
         }
       });
     }

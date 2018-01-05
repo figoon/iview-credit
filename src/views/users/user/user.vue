@@ -1,224 +1,142 @@
 <template>
   <div>
-    <Row>
-      <Col span="24">
+    <Row :gutter="10">
+      <Col span="4">
         <Card>
           <p slot="title">
-            <Icon type="person-stalker"></Icon>
-            用户列表
+            <Icon type="social-buffer"></Icon>
+            组织机构
           </p>
-          <Tabs>
-            <TabPane 
-              v-for="(users, key) in userList" 
-              :label="key | convertType" 
-              :name="key" 
-              :key="key">
-              <Row>
-                <Col 
-                  :xs="{ span: 12}" 
-                  :lg="{ span: 8}"  
-                  v-for='(user, index) in users' 
-                  :key='index'>
-                  <Card>
-                    <div class="media user">
-                      <a class="media-avatar pull-left" href="#">
-                        <img :src="avatorImage">
-                      </a>
-                      <div class="media-body">
-                        <h3 class="media-title">
-                          {{user.name}}
-                        </h3>
-                        <p>
-                          <Button type="primary" shape="circle" size="small" icon="edit" :data-id="index" @click="onEdit($event)">修改</Button>
-                          <Poptip
-                            confirm
-                            title="您确认删除吗？"
-                            @on-ok="onDelete"
-                            @on-cancel="onCancel">
-                            <Button type="error" shape="circle" size="small"  icon="trash-a" :data-id="index">删除</Button>
-                          </Poptip>
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
-                </Col>
-              </Row>
-            </TabPane>
-          </Tabs>
+          <Row type="flex" justify="start" align="middle">
+            <Tree :data="orgList" @on-select-change="onSelect"></Tree>
+          </Row>
         </Card>
+      </Col>
+      <Col span="20">
+        <Row :gutter="10">
+          <Col span="24" :style="{marginBottom: '10px'}">
+            <Card>
+              <p slot="title">
+                <Icon type="ios-search"></Icon>
+                查询条件
+              </p>
+              <Form ref="formInline" :model="formInline" :label-width="60" inline>
+                <FormItem label="归属公司">
+                  <Select v-model="formInline.company" @on-change="onSearch">
+                    <Option value="beijing">New York</Option>
+                    <Option value="shanghai">London</Option>
+                    <Option value="shenzhen">Sydney</Option>
+                  </Select>
+                </FormItem>
+                <FormItem label="归属部门">
+                  <Select v-model="formInline.department" @on-change="onSearch">
+                      <Option value="beijing">New York</Option>
+                      <Option value="shanghai">London</Option>
+                      <Option value="shenzhen">Sydney</Option>
+                  </Select>
+                </FormItem>
+                <FormItem label="登录名">
+                  <Input v-model="formInline.loginName" @on-change="onSearch"></Input>
+                </FormItem>
+                <FormItem label="姓名">
+                  <Input v-model="formInline.name" @on-change="onSearch"></Input>
+                </FormItem>
+              </Form>
+            </Card>
+          </Col>
+        </Row>
+        <Row :gutter="10">
+          <Col span="24" :style="{marginBottom: '10px'}">
+            <Card>
+              <p slot="title">
+                <Icon type="ios-list"></Icon>
+                数据列表
+              </p>
+              <Table :columns="columns1" :data="data2" size="small" stripe></Table>
+            </Card>
+          </Col>
+        </Row>
       </Col>
     </Row>
   </div>
 </template>
 
+
 <script>
+  import * as table from '../../tables/data/search';
 
-export default {
-  name: 'users-user',
-  created: function(){
-    this.dealUsers()
-  },
-  data () {
-    return {
-      userList: {},
-      info: {
-        name: [{
-          user: 'seadon',
-          age: '10'
-        }]
-      }
-    };
-  },
-  computed: {
-    avatorImage() {
-      return localStorage.avatorImgPath;
-    }
-  },
-  filters: {
-    convertType: (type) => {
-      switch (type) {
-        case 'root':
-          return '管理员';
-        case 'operator':
-          return '操作员';
-        case 'guest':
-          return '访客';
-        default:
-          return '未定义';
-      }
-    }
-  },
-  methods: {
-    // 封装用户数据
-    dealUsers() {
-      this.$http.get('/api/user')
-        .then((res) => {
-          if(res.status == 200){
-            res.data.forEach(function(element,aindex,arr){
-              let users = {};
-              users.name = element.user_name;
-              users.pwd = element.password;
-
-              users.role = element.role;
-              users.role_name = (function() {
-                switch(element.role) {
-                  case 'root':
-                    return '管理员';
-                  case 'operator':
-                    return '操作员';
-                  case 'guest':
-                    return '访客';
-                };
-              })();
-              users.hover = 0;
-              users.form = 0;
-
-              // 如列表中不存在，则创建列表
-              if(!this.userList[element.role]) {
-                //this.userList[element.role] = [];
-                this.$set(this.userList, element.role, [])
-                // 对象push到数组中
-                this.userList[element.role].push(users);
-              } else {
-                this.userList[element.role].push(users);
+  export default {
+    name: 'international_index',
+    data () {
+      return {
+        formInline: {
+          company: '',
+          department: '',
+          loginName: '',
+          name: ''
+        },
+        columns1: table.columns1,
+        data2: [],
+        initTable2: [],
+        treeSelect: [], // 实际选择的目录
+        orgList: [
+          {
+            title: '高伟达公司',
+            expand: true,
+            children: [
+              {
+                title: '研发中心',
+              },
+              {
+                title: '北京分软',
+              },
+              {
+                title: '厦门研发',
               }
-            }, this)
-           
-          } else{
-            this.$message.error('获取用户信息失败！')
+            ]
           }
-        }, (err) => {
-          this.$message.error('连接服务器出错！');
-          console.error(err);
-        })
-
+        ]
+      };
     },
-    // 编辑用户
-    onEdit(e) {
-      let target=e.target;
-      if(target.nodeName!="BUTTON")
-        target=target.parentNode;
-      let i = target.getAttribute('data-id');
-      console.dir(i)
+    methods: {
+      init () {
+        this.data2 = this.initTable2 = table.searchTable2;
+      },
+      onSelect (selectedArray) {
+        // this.treeSelect = selectedArray.map(item => {
+        //   return item.title;
+        // });
+        console.dir(selectedArray)
+      },
+      search (data, argumentObj) {
+        let res = data;
+        let dataClone = data;
+        for (let argu in argumentObj) {
+          if (argumentObj[argu].length > 0) {
+            res = dataClone.filter(d => {
+              return d[argu].indexOf(argumentObj[argu]) > -1;
+            });
+            dataClone = res;
+          }
+        }
+        return res;
+      },
+      onSearch () {
+        this.data2 = this.initTable2;
+        this.data2 = this.search(this.data2, {name: this.formInline.loginName, tel: this.formInline.name});
+      }
     },
-    // 删除用户
-    onDelete() {
-
-      this.$Message.success('删除成功！');
-    },
-    // 取消操作
-    onCancel() {
-      console.log('取消')
+    mounted () {
+      this.init();
     }
-  }
-};
+  };
 </script>
 
 <style lang="less" scoped>
-  .ivu-col {
-    padding: 10px;
-  }
-  .pull-left {
-    float: left;
-  }
-  .media {
-    position: relative;
-    zoom: 1;
-    display: table;
-    width: 100%;
-      
-    &.user {
-      -webkit-transition: all .2s ease-in-out;
-      -moz-transition: all .2s ease-in-out;
-      transition: all .2s ease-in-out;
-      border: 1px solid transparent;
-
-      &:hover {
-        .media-avatar {
-          background: #fff;
-          border-color: #bbb;
-        }
-
-        .media-body {
-          .media-title {
-            border-bottom-color: #2d8cf0;
-          }
-        }
-      }
-    }
-
-    .media-avatar {
-      border: 1px solid rgba(204, 204, 204, 0.5);
-      -webkit-border-radius: 50px;
-      -moz-border-radius: 50px;
-      border-radius: 50px;
-      height: 100px;
+  .ivu-form-item {
+    margin-bottom: 5px;
+    .ivu-select {
       width: 100px;
-      margin-right: 15px;
-
-      img {
-        -webkit-border-radius: 45px;
-        -moz-border-radius: 45px;
-        border-radius: 45px;
-        height: 90px;
-        width: 90px;
-        margin: 4px;
-      }
-    }
-      
-    .media-body {
-      overflow: hidden;
-      zoom: 1;
-
-      .media-title {
-        font-size: 18px;
-        line-height: 20px;
-        margin: 18px 0 12px 0;
-        padding-bottom: 8px;
-        border-bottom: 1px solid #dddee1;
-        letter-spacing: 2px;
-        transition: border-bottom-color 1s;
-      }
     }
   }
 </style>
