@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="i-user-manage">
     <Row :gutter="10">
       <Col span="4">
         <Card>
@@ -8,7 +8,9 @@
             组织机构
           </p>
           <Row type="flex" justify="start" align="middle">
-            <Tree :data="orgList" @on-select-change="onSelect"></Tree>
+            <Tree ref="tree" 
+              :data="orgList" 
+              @on-select-change="onSelect"></Tree>
           </Row>
         </Card>
       </Col>
@@ -20,27 +22,24 @@
                 <Icon type="ios-search"></Icon>
                 查询条件
               </p>
-              <Form ref="formInline" :model="formInline" :label-width="60" inline>
-                <FormItem label="归属公司">
-                  <Select v-model="formInline.company" @on-change="onSearch">
-                    <Option value="beijing">New York</Option>
-                    <Option value="shanghai">London</Option>
-                    <Option value="shenzhen">Sydney</Option>
-                  </Select>
-                </FormItem>
-                <FormItem label="归属部门">
-                  <Select v-model="formInline.department" @on-change="onSearch">
-                      <Option value="beijing">New York</Option>
-                      <Option value="shanghai">London</Option>
-                      <Option value="shenzhen">Sydney</Option>
-                  </Select>
-                </FormItem>
-                <FormItem label="登录名">
-                  <Input v-model="formInline.loginName" @on-change="onSearch"></Input>
-                </FormItem>
-                <FormItem label="姓名">
-                  <Input v-model="formInline.name" @on-change="onSearch"></Input>
-                </FormItem>
+              <Form ref="formInline" :model="formInline" :label-width="75" >
+                <Row :gutter="10">
+                  <Col span="10">
+                    <FormItem label="归属机构">
+                      <org-selector ref="orgSelec" v-model="formInline.orgValue" @on-change="onSearch" level="1"/>
+                    </FormItem>
+                  </Col>
+                  <Col span="7">
+                    <FormItem label="登录名">
+                      <Input v-model="formInline.loginName" @on-change="onSearch"></Input>
+                    </FormItem>
+                  </Col>
+                  <Col span="7">
+                    <FormItem label="姓名">
+                      <Input v-model="formInline.name" @on-change="onSearch"></Input>
+                    </FormItem>
+                  </Col>
+                </Row>
               </Form>
             </Card>
           </Col>
@@ -63,15 +62,20 @@
 
 
 <script>
-  import * as table from '../../tables/data/search';
+  import * as table from '../../tables/data/search';  
+  import Tree from '../../my-components/tree/tree.vue';
+  import orgSelector from '../../my-components/cascade/components/al-selector.vue';
 
   export default {
-    name: 'international_index',
+    name: 'users_user',
+    components: {
+      Tree,
+      orgSelector
+    },
     data () {
       return {
         formInline: {
-          company: '',
-          department: '',
+          orgValue: [],
           loginName: '',
           name: ''
         },
@@ -79,34 +83,36 @@
         data2: [],
         initTable2: [],
         treeSelect: [], // 实际选择的目录
-        orgList: [
-          {
-            title: '高伟达公司',
-            expand: true,
-            children: [
-              {
-                title: '研发中心',
-              },
-              {
-                title: '北京分软',
-              },
-              {
-                title: '厦门研发',
-              }
-            ]
-          }
-        ]
+        orgList: []
       };
     },
     methods: {
       init () {
         this.data2 = this.initTable2 = table.searchTable2;
       },
+      dealTree () {
+        let orgData = JSON.parse(localStorage.getItem('org')),
+            companyData = orgData['company'];
+
+        for(let key of Object.keys(companyData)){
+          let orgObj = {};
+          orgObj.title = companyData[key];
+          orgObj.expand = true;
+          orgObj.children = [];
+
+          for(let dep of Object.keys(orgData[key])){
+            let depObj = {};
+            depObj.title = orgData[key][dep];
+            orgObj.children.push(depObj);
+          };
+
+          this.orgList.push(orgObj);
+        }
+      },
+      // 组织机构选择触发
       onSelect (selectedArray) {
-        // this.treeSelect = selectedArray.map(item => {
-        //   return item.title;
-        // });
-        console.dir(selectedArray)
+        this.formInline.orgValue = selectedArray;
+        this.$refs.orgSelec.$emit('cascade-bridge');
       },
       search (data, argumentObj) {
         let res = data;
@@ -128,15 +134,22 @@
     },
     mounted () {
       this.init();
+      this.dealTree();
     }
   };
 </script>
 
-<style lang="less" scoped>
-  .ivu-form-item {
-    margin-bottom: 5px;
-    .ivu-select {
-      width: 100px;
+<style lang="less">
+  #i-user-manage {
+    .ivu-col-span-10 {
+      .ivu-form-item {
+        .ivu-form-item-label {
+          width: 70px!important;
+        }
+      }
+    }
+    .ivu-form-item {
+      margin-bottom: 5px;
     }
   }
 </style>

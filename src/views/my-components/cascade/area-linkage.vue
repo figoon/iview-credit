@@ -1,3 +1,8 @@
+<style lang="less">
+    @import './area-linkage.less';
+    @import '../../../styles/common/common.less';
+</style>
+
 <template>
     <div>
         <Row :gutter="10">
@@ -208,8 +213,3 @@ export default {
     }
 };
 </script>
-
-<style lang="less">
-    @import './area-linkage.less';
-    @import '../../../styles/common/common.less';
-</style>
