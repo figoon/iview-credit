@@ -19,7 +19,25 @@ module.exports = merge(webpackBaseConfig, {
 		filename: '[name].js',
 		chunkFilename: '[name].chunk.js'
 	},
+	devServer: {
+    historyApiFallback: true,
+    hot: true,
+    inline: true,
+    progress: true,
+    port: 3001,
+    proxy: {
+      '/auth':{
+        target: 'http://localhost:8889',
+        changeOrigin: true
+      },
+      '/api':{
+        target: 'http://localhost:8889',
+        changeOrigin: true
+			}
+    }
+  },
 	plugins: [
+		new webpack.HotModuleReplacementPlugin(),
 		new ExtractTextPlugin({
 			filename: '[name].css',
 			allChunks: true

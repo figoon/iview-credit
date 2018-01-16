@@ -70,10 +70,10 @@ export default {
                 Cookies.set('password', this.form.password);
                 this.$store.commit('setAvator', 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3448484253,3685836170&fm=27&gp=0.jpg');
                 // 权限测试
-                if (this.form.userName === 'git') {
-                  Cookies.set('access', 0);
-                } else {
+                if (this.form.userName === 'admin') {
                   Cookies.set('access', 1);
+                } else {
+                  Cookies.set('access', 0);
                 }
 
                 // 登录成功，显示提示语

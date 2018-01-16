@@ -1,5 +1,5 @@
 <template>
-  <div class="home-main" style="display:none">
+  <div class="home-main" style="display:block">
     <Row :gutter="10">
       <Col :md="24" :lg="8">
         <Row class-name="home-page-row1" :gutter="10">
@@ -62,7 +62,7 @@
           </Col>
         </Row>
       </Col>
-      <Col :md="24" :lg="16">
+      <Col :md="24" :lg="16" :style="{display: 'none'}">
         <Row :gutter="5">
           <Col :xs="24" :sm="12" :md="6" :style="{marginBottom: '10px'}">
             <infor-card
@@ -122,7 +122,7 @@
         </Row>
       </Col>
     </Row>
-    <Row :gutter="10" class="margin-top-10">
+    <Row :gutter="10" class="margin-top-10" :style="{display: 'none'}">
       <Col :md="24" :lg="8" :style="{marginBottom: '10px'}">
         <Card>
           <p slot="title" class="card-title">
@@ -157,7 +157,7 @@
         </Card>
       </Col>
     </Row>
-    <Row class="margin-top-10">
+    <Row class="margin-top-10" :style="{display: 'block'}">
       <Card>
         <p slot="title" class="card-title">
           <Icon type="ios-shuffle-strong"></Icon>

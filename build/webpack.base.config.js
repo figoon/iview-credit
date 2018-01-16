@@ -18,23 +18,6 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, '../dist/dist')
   },
-  devServer: {
-    historyApiFallback: true,
-    hot: true,
-    inline: true,
-    progress: true,
-    port: 3000,
-    proxy: {
-      '/auth':{
-        target: 'http://localhost:8889',
-        changeOrigin: true
-      },
-      '/api':{
-        target: 'http://localhost:8889',
-        changeOrigin: true
-      }
-    }
-  },
   module: {
     rules: [
       {

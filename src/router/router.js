@@ -68,85 +68,34 @@ export const otherRouter = {
 export const appRouter = [
 	{
 		path: '/workbench',
-		icon: 'home',
+		icon: 'monitor',
 		name: 'workbench',
-		title: '工作台',
+		title: '运营监控工作台',
 		component: Main,
 		children: [
 			{ 
-				path: 'daily', 
-				title: '日常工作', 
-				name: 'workbench_daily', 
-				component: resolve => { require(['@/views/workbench/daily/daily.vue'], resolve); } 
+				path: 'draft', 
+				title: '暂存数据统计', 
+				name: 'workbench_draft', 
+				component: resolve => { require(['@/views/workbench/draft/draft.vue'], resolve); } 
 			},
 			{
-				path: 'done', 
-				title: '已办查询', 
-				name: 'done_query', 
-				component: resolve => { require(['@/views/workbench/done/done.vue'], resolve); } 
-			}
-		]
-	},
-	{
-		path: '/customer',
-		icon: 'person-stalker',
-		name: 'customer',
-		title: '客户管理',
-		component: Main,
-		children: [
-			{ 
-				path: 'acceptance', 
-				title: '客户受理查询', 
-				name: 'customer_acceptance', 
-				component: resolve => { require(['@/views/customer/acceptance/acceptance.vue'], resolve); } 
+				path: 'users', 
+				title: '客户数据查询', 
+				name: 'workbench_users', 
+				component: resolve => { require(['@/views/workbench/users/users.vue'], resolve); } 
 			},
-			{ 
-				path: 'acceptance', 
-				title: '预留位', 
-				name: 'customer_test', 
-				component: resolve => { require(['@/views/error-page/404.vue'], resolve); }
-			}
-		]
-	},
-	{
-		path: '/loan',
-		icon: 'card',
-		name: 'loan',
-		title: '贷款管理',
-		component: Main,
-		children: [
-			{ 
-				path: 'acceptance', 
-				title: '贷款受理查询', 
-				name: 'loan_acceptance', 
-				component: resolve => { require(['@/views/loan/acceptance/acceptance.vue'], resolve); } 
+			{
+				path: 'loans', 
+				title: '贷款数据查询', 
+				name: 'workbench_loans', 
+				component: resolve => { require(['@/views/workbench/loans/loans.vue'], resolve); } 
 			},
-			{ 
-				path: 'approval', 
-				title: '审批贷款查询', 
-				name: 'loan_approval', 
-				component: resolve => { require(['@/views/loan/approval/approval.vue'], resolve); } 
-			}
-		]
-	},
-	{
-		path: '/log',
-		icon: 'bug',
-		name: 'log',
-		title: '日志管理',
-		component: Main,
-		children: [
-			{ 
-				path: 'system', 
-				title: '系统日志', 
-				name: 'log_system', 
-				component: resolve => { require(['@/views/log/system/system.vue'], resolve); } 
-			},
-			{ 
-				path: 'system', 
-				title: '预留位', 
-				name: 'log_test', 
-				component: resolve => { require(['@/views/error-page/404.vue'], resolve); }
+			{
+				path: 'flow', 
+				title: '流程数据查询', 
+				name: 'workbench_flow', 
+				component: resolve => { require(['@/views/workbench/flow/flow.vue'], resolve); } 
 			}
 		]
 	},
@@ -154,19 +103,19 @@ export const appRouter = [
 		path: '/system',
 		icon: 'gear-b',
 		name: 'system',
-		title: '系统管理',
+		title: '系统参数管理',
 		component: Main,
 		children: [
+			{ 
+				path: 'rules', 
+				title: '规则管理', 
+				name: 'system_rules', 
+				component: resolve => { require(['@/views/system/rules/rules.vue'], resolve); } 
+			},
 			{ 
 				path: 'dictionaries', 
 				title: '字典管理', 
 				name: 'system_dictionaries', 
-				component: resolve => { require(['@/views/system/dictionaries/dictionaries.vue'], resolve); } 
-			},
-			{ 
-				path: 'dictionaries', 
-				title: '预留位', 
-				name: 'system_test', 
 				component: resolve => { require(['@/views/system/dictionaries/dictionaries.vue'], resolve); } 
 			}
 		]
@@ -179,16 +128,16 @@ export const appRouter = [
 		component: Main,
 		children: [
 			{ 
-				path: 'role', 
-				title: '角色管理', 
-				name: 'users_role', 
-				component: resolve => { require(['@/views/users/role/role.vue'], resolve); } 
-			},
-			{ 
 				path: 'organization', 
 				title: '机构管理', 
 				name: 'users_organization', 
 				component: resolve => { require(['@/views/users/organization/organization.vue'], resolve); } 
+			},
+			{ 
+				path: 'role', 
+				title: '角色管理', 
+				name: 'users_role', 
+				component: resolve => { require(['@/views/users/role/role.vue'], resolve); } 
 			},
 			{ 
 				path: 'user', 
@@ -216,12 +165,6 @@ export const appRouter = [
 				title: '管理流程', 
 				name: 'flow_manage', 
 				component: resolve => { require(['@/views/flow/manage/manage.vue'], resolve); } 
-			},
-			{ 
-				path: 'ongoing', 
-				title: '进行中流程', 
-				name: 'flow_ongoing', 
-				component: resolve => { require(['@/views/flow/ongoing/ongoing.vue'], resolve); } 
 			}
 		]
 	},
@@ -230,6 +173,7 @@ export const appRouter = [
 		icon: 'key',
 		name: 'access',
 		title: '权限管理',
+		access: 1,
 		component: Main,
 		children: [
 			{ path: 'index', title: '权限管理', name: 'access_index', component: resolve => { require(['@/views/access/access.vue'], resolve); } }
@@ -240,7 +184,7 @@ export const appRouter = [
 		icon: 'lock-combination',
 		title: '权限测试页',
 		name: 'accesstest',
-		access: 0,
+		access: 1,
 		component: Main,
 		children: [
 			{ path: 'index', title: '权限测试页', name: 'accesstest_index', access: 0, component: resolve => { require(['@/views/access/access-test.vue'], resolve); } }
@@ -251,6 +195,7 @@ export const appRouter = [
 		icon: 'earth',
 		title: {i18n: 'international'},
 		name: 'international',
+		access: 1,
 		component: Main,
 		children: [
 			{ path: 'index', title: {i18n: 'international'}, name: 'international_index', component: resolve => { require(['@/views/international/international.vue'], resolve); } }
@@ -260,6 +205,7 @@ export const appRouter = [
 		path: '/component',
 		icon: 'social-buffer',
 		name: 'component',
+		access: 1,
 		title: '组件',
 		component: Main,
 		children: [
@@ -325,6 +271,7 @@ export const appRouter = [
 		path: '/form',
 		icon: 'android-checkbox',
 		name: 'form',
+		access: 1,
 		title: '表单编辑',
 		component: Main,
 		children: [
@@ -349,6 +296,7 @@ export const appRouter = [
 		path: '/tables',
 		icon: 'ios-grid-view',
 		name: 'tables',
+		access: 1,
 		title: '表格',
 		component: Main,
 		children: [
@@ -363,6 +311,7 @@ export const appRouter = [
 		path: '/advanced-router',
 		icon: 'ios-infinite',
 		name: 'advanced-router',
+		access: 1,
 		title: '高级路由',
 		component: Main,
 		children: [
@@ -375,6 +324,7 @@ export const appRouter = [
 		icon: 'android-sad',
 		title: '错误页面',
 		name: 'errorpage',
+		access: 1,
 		component: Main,
 		children: [
 			{ path: 'index', title: '错误页面', name: 'errorpage_index', component: resolve => { require(['@/views/error-page/error-page.vue'], resolve); } }
