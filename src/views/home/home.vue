@@ -31,7 +31,7 @@
               </Row>
             </Card>
           </Col>
-          <Col :md="12" :lg="24" :style="{marginBottom: '10px'}">
+          <Col :md="12" :lg="24" :style="{marginBottom: '10px',display: 'none'}">
             <Card>
               <p slot="title" class="card-title">
                 <Icon type="android-checkbox-outline"></Icon>
@@ -157,7 +157,7 @@
         </Card>
       </Col>
     </Row>
-    <Row class="margin-top-10" :style="{display: 'block'}">
+    <Row class="margin-top-10" :style="{display: 'none'}">
       <Card>
         <p slot="title" class="card-title">
           <Icon type="ios-shuffle-strong"></Icon>
