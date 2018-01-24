@@ -24,7 +24,9 @@ module.exports = merge(webpackBaseConfig, {
     hot: true,
     inline: true,
     progress: true,
-    port: 3001,
+		port: 3001,
+		disableHostCheck: true,
+		host: "0.0.0.0",
     proxy: {
       '/auth':{
         target: 'http://localhost:8889',
