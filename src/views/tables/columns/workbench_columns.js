@@ -125,3 +125,29 @@ export const loan_columns = [
     width: 130
   }
 ]
+
+export const flow_columns = [
+  {
+    key: 'cus_name',
+    title: '客户名称',
+    width: 120
+  },
+  {
+    key: 'cus_no',
+    title: '贷款编号',
+    width: 120
+  },
+  {
+    key: 'certificate_type',
+    title: '产品类型',
+    width: 180,
+    render: (h, params) => {
+      const row = params.row;
+      return row.certificate_type === '10' ? '个人经营性车辆按揭贷款' :  '非额度项下个商信用贷贷款';
+    }
+  },
+  {
+    key: 'dispose_time',
+    title: '受理时间'
+  }
+]

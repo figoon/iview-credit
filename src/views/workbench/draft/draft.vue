@@ -82,7 +82,7 @@
                 :name="key">
                 <Row type="flex" justify="start" :gutter="20">
                   <Col span="12" v-for="(value, key) in info" :key="key">
-                    <p v-if="key=='实体经营客户名'">{{key}}： <Button type="primary" size="small" @click="companyModel = true">{{value}}</Button></p>
+                    <p v-if="key=='实体经营客户名'">{{key}}： <Button type="primary" size="small" @click="companyModal = true">{{value}}</Button></p>
                     <p v-else>{{key}}：{{value}}</p>
                   </Col>
                 </Row>
@@ -94,7 +94,7 @@
             </div>
           </Modal>
 
-          <Modal v-model="companyModel" width="750" :styles="{top: '30px'}">
+          <Modal v-model="companyModal" width="750" :styles="{top: '30px'}">
             <div slot="header" style="color:#f60;text-align:left">
               <Row :gutter="15">
                 <Col span="2">
@@ -167,7 +167,7 @@
         },
         infoType: '',
         showInfo: false,
-        companyModel: false,
+        companyModal: false,
         modal_loading: false,
         draftList: [],
         draftColumns: this.getColumns()
@@ -300,7 +300,7 @@
         this.modal_loading = true;
         setTimeout(() => {
           this.modal_loading = false;
-          this.companyModel = false;
+          this.companyModal = false;
           this.$Message.success('成功关闭组织机构窗口！');
         }, 500);
       },
