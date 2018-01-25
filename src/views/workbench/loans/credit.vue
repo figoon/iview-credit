@@ -39,7 +39,7 @@
                 </Row>
               </Form>
 
-              <Table :columns="customerColumns" :data="customerList" size="small" stripe :style="{marginBottom: '10px'}"></Table>
+              <Table :columns="creditColumns" :data="customerList" size="small" stripe :style="{marginBottom: '10px'}"></Table>
               <Row type="flex" justify="end">
                 <Col span="20">
                   <Page :total="totalNum" show-sizer show-total
@@ -202,23 +202,44 @@
           endDate: '20181010',
           code: '',
           name: ''
+        },{
+          cardType: [
+            {
+              value: '10',
+              label: '身份证'
+            },
+            {
+              value: '11',
+              label: '组织机构代码'
+            }
+          ],
+          selectType: '',
+          dateRange: '',
+          beginDate: '20100101',
+          endDate: '20181010',
+          code: '',
+          name: ''
         }],
         items: [
           {
-            label: '注册用户',
-            name: 'reg'
+            label: '申请笔数',
+            name: 'apply'
           },
           {
-            label: '新增注册用户',
-            name: 'add'
-          },
-          {
-            label: '准入客户',
+            label: '审批笔数',
             name: 'access'
           },
           {
-            label: '拒绝客户',
+            label: '拒绝笔数',
             name: 'deny'
+          },
+          {
+            label: '本月还款笔数',
+            name: 'repay'
+          },
+          {
+            label: '本月逾期笔数',
+            name: 'overdue'
           }
         ],
         infos: {},
@@ -233,19 +254,19 @@
         companyModel: false,
         modal_loading: false,
         customerList: [],
-        customerColumns: this.getColumns()
+        creditColumns: this.getColumns()
       }
     },
     computed: {
       active_tab () {
-				return this.$store.state.app.customerActive;
+				return this.$store.state.app.creditActive;
 			}
     },
     methods: {
       // 初始化
       init () {
         // 获取用户列表
-        this.getCustomerList(10, 1);
+        this.getCreditList(10, 1);
       },
       // 动态插入表格列
       getColumns () {
@@ -288,9 +309,9 @@
         return columns.draft_columns;
       },
       // 获取草稿列表
-      getCustomerList (size, num) {
+      getCreditList (size, num) {
         // 调用后台接口
-        this.$http.get('api/credit/draft/1/'+ size +'/'+ num)
+        this.$http.get('api/credit/draft/2/'+ size +'/'+ num)
 					.then((res) => {
             // 按状态处理返回结果
 						if(res.status == 200){
@@ -329,12 +350,12 @@
       },
       // 页码切换回调
       handleCurrentChange (num) {
-        this.getCustomerList(this.size, num);
+        this.getCreditList(this.size, num);
       },
       // 切换每页条数触发
       handleSizeChange (size) {
         this.size = size;
-        this.getCustomerList(size,1);
+        this.getCreditList(size,1);
       },
       // 选择日期范围
       handleDate (date) {
@@ -390,7 +411,7 @@
       },
       // 搜索事件
       onSearch (index) {
-        this.$http.get('/api/credit/draft/search/1/' + 
+        this.$http.get('/api/credit/draft/search/2/' + 
           (this.formSearch[index].selectType || '*')  + '/' + 
           (this.formSearch[index].code || '*') + '/' + 
           (this.formSearch[index].beginDate || '*') + '/' + 

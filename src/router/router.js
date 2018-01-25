@@ -61,7 +61,8 @@ export const otherRouter = {
 		{ path: 'order/:order_id', title: '订单详情', name: 'order-info', component: resolve => { require(['@/views/advanced-router/component/order-info.vue'], resolve); } }, // 用于展示动态路由
 		{ path: 'shopping', title: '购物详情', name: 'shopping', component: resolve => { require(['@/views/advanced-router/component/shopping-info.vue'], resolve); } }, // 用于展示带参路由
 		{ path: 'message', title: '消息中心', name: 'message_index', component: resolve => { require(['@/views/message/message.vue'], resolve); } },
-		{ path: 'customer', title: '客户信息查询', name: 'workbench_customer', component: resolve => { require(['@/views/workbench/users/customer.vue'], resolve); }}
+		{ path: 'customer', title: '客户信息查询', name: 'workbench_customer', component: resolve => { require(['@/views/workbench/users/customer.vue'], resolve); }},
+		{ path: 'credit', title: '贷款信息查询', name: 'workbench_credit', component: resolve => { require(['@/views/workbench/loans/credit.vue'], resolve); }}
 	]
 };
 

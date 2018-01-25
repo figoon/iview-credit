@@ -62,3 +62,66 @@ export const user_columns = [
     title: '拒绝客户(总量)'
   }
 ]
+
+export const loan_columns = [
+  {
+    key: 'area',
+    title: '地理区域',
+    width: 110
+  },
+  {
+    key: 'channel_type',
+    title: '渠道类型',
+    width: 100
+  },
+  {
+    key: 'channel_pro',
+    title: '贷款产品',
+    width: 100
+  },
+  {
+    key: 'date',
+    title: '日期',
+    width: 100
+  },
+  {
+    key: 'avg_limit',
+    title: '平均额度',
+    width: 100
+  },
+  {
+    key: 'apply_num',
+    title: '申请笔数',
+    width: 90
+  },
+  {
+    key: 'access_num',
+    title: '审批笔数',
+    width: 90
+  },
+  {
+    key: 'deny_num',
+    title: '拒绝笔数',
+    width: 90
+  },
+  {
+    key: 'repay_num',
+    title: '本月还款笔数',
+    width: 120
+  },
+  {
+    key: 'promise_money',
+    title: '本月还款金额',
+    width: 120
+  },
+  {
+    key: 'overdue_num',
+    title: '本月逾期笔数',
+    width: 120
+  },
+  {
+    key: 'overdue_money',
+    title: '本月逾期金额',
+    width: 130
+  }
+]

@@ -39,10 +39,10 @@
             </ButtonGroup>
             <Button type="primary" @click="timeing" :loading="loading" long style="margin:10px 0 10px;">定时刷新</Button>
             <Row class="publish-button-con">
-              <Button type="primary" @click="handleCustomer('reg')" long style="margin:0 0 10px;">注册客户</Button>
-              <Button type="primary" @click="handleCustomer('add')" long style="margin:0 0 10px;">新增注册客户</Button>
-              <Button type="primary" @click="handleCustomer('access')" long style="margin:0 0 10px;">准入客户</Button>
-              <Button type="primary" @click="handleCustomer('deny')" long style="margin:0 0 10px;">拒绝客户</Button>
+              <Button type="primary" @click="handleCustomer('reg')" long style="margin:0 0 10px;">注册客户(总量)</Button>
+              <Button type="primary" @click="handleCustomer('add')" long style="margin:0 0 10px;">新增注册客户(当天)</Button>
+              <Button type="primary" @click="handleCustomer('access')" long style="margin:0 0 10px;">准入客户(总量)</Button>
+              <Button type="primary" @click="handleCustomer('deny')" long style="margin:0 0 10px;">拒绝客户(总量)</Button>
             </Row>
           </div>
         </Card>

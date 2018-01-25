@@ -11,24 +11,29 @@
             <Row :gutter="10">
               <Col span="5">
                 <FormItem label="证件类型" :label-width="75">
-                  <Select v-model="formSearch.selectType" @on-change="onSearch">
+                  <Select v-model="formSearch.selectType">
                     <Option v-for="item in formSearch.cardType" :value="item.value" :key="item.value">{{ item.label }}</Option>
                   </Select>
                 </FormItem>
               </Col>
               <Col span="5" v-if="formSearch.selectType">
                 <FormItem :label-width="0">
-                  <Input v-model="formSearch.code" placeholder="请输入证件信息" @on-change="onSearch"></Input>
+                  <Input v-model="formSearch.code" placeholder="请输入证件信息"></Input>
                 </FormItem>
               </Col>
               <Col span="6">
                 <FormItem label="日期范围" :label-width="75">
-                  <DatePicker type="daterange" placement="bottom-end" placeholder="选择日期" v-model="formSearch.dateRange" @on-change="onSearch"></DatePicker>              
+                  <DatePicker type="date" placement="bottom-end" placeholder="选择日期" v-model="formSearch.date" @on-change="handleDate"></DatePicker>              
                 </FormItem>
               </Col>
               <Col span="6">
                 <FormItem label="客户名称" :label-width="75"> 
-                  <Input v-model="formSearch.name" @on-change="onSearch"></Input>
+                  <Input v-model="formSearch.name"></Input>
+                </FormItem>
+              </Col>
+              <Col span="2">
+                <FormItem> 
+                  <Button type="primary" @click="onSearch">搜索</Button>
                 </FormItem>
               </Col>
             </Row>
@@ -65,17 +70,58 @@
                 </Col>
                 <Col span="18">
                   <Row style="margin-top: 8px;">
-                    <Col span="24"><p style="height:18px;font-size:14px;color:#f60;">客户名称：张三</p></Col>
-                    <Col span="24"><p style="height:18px;font-size:14px;color:#f60;">客户编号：1234556778865 &nbsp;&nbsp;&nbsp;&nbsp;<span v-if="infoType == '2'">贷款编号：DK12345567788652384901234</span></p></Col>
+                    <Col span="24"><p style="height:18px;font-size:14px;color:#f60;">客户名称：{{modelInfo.customer_name}}</p></Col>
+                    <Col span="24"><p style="height:18px;font-size:14px;color:#f60;">客户编号：{{modelInfo.customer_code}} &nbsp;&nbsp;&nbsp;&nbsp;<span v-if="infoType == '2'">贷款编号：{{modelInfo.loans_code}}</span></p></Col>
                   </Row>
                 </Col>
               </Row>
             </div>
-            <Row type="flex" justify="start" :gutter="20">
-              <Col span="12" v-for="(value, key) in infos" :key="key"><p>{{key}}：{{value}}</p></Col>
-            </Row>
+            <Tabs size="small">
+              <TabPane v-for="(info, key, index) in infos" :key="index" 
+                :label="key" 
+                :name="key">
+                <Row type="flex" justify="start" :gutter="20">
+                  <Col span="12" v-for="(value, key) in info" :key="key">
+                    <p v-if="key=='实体经营客户名'">{{key}}： <Button type="primary" size="small" @click="companyModel = true">{{value}}</Button></p>
+                    <p v-else>{{key}}：{{value}}</p>
+                  </Col>
+                </Row>
+              </TabPane>
+            </Tabs>
+            
             <div slot="footer">
               <Button type="error" size="large" long :loading="modal_loading" @click="onConfirm">确定</Button>
+            </div>
+          </Modal>
+
+          <Modal v-model="companyModel" width="750" :styles="{top: '30px'}">
+            <div slot="header" style="color:#f60;text-align:left">
+              <Row :gutter="15">
+                <Col span="2">
+                  <Icon type="android-person" size="50"></Icon>
+                </Col>
+                <Col span="18">
+                  <Row style="margin-top: 8px;">
+                    <Col span="24"><p style="height:18px;font-size:14px;color:#f60;">客户名称：{{modelInfo.customer_name}}</p></Col>
+                    <Col span="24"><p style="height:18px;font-size:14px;color:#f60;">客户编号：{{modelInfo.customer_code}} &nbsp;&nbsp;&nbsp;&nbsp;<span v-if="infoType == '2'">贷款编号：{{modelInfo.loans_code}}</span></p></Col>
+                  </Row>
+                </Col>
+              </Row>
+            </div>
+            <Tabs size="small">
+              <TabPane v-for="(info, key, index) in comInfos" :key="index" 
+                :label="key" 
+                :name="key">
+                <Row type="flex" justify="start" :gutter="20">
+                  <Col span="12" v-for="(value, key) in info" :key="key">
+                    <p>{{key}}：{{value}}</p>
+                  </Col>
+                </Row>
+              </TabPane>
+            </Tabs>
+            
+            <div slot="footer">
+              <Button type="error" size="large" long :loading="modal_loading" @click="onSeConfirm">确定</Button>
             </div>
           </Modal>
         </Card>
@@ -106,15 +152,22 @@
             }
           ],
           selectType: '',
-          dateRange: '',
-          beginDate: '20170101',
+          date: '',
+          beginDate: '20100101',
           endDate: '20181010',
           code: '',
           name: ''
         },
         infos: {},
+        comInfos: infos.companyInfos,
+        modelInfo: {
+          customer_name: '',
+          customer_code: '',
+          loans_code: 'DK12345567788652384901234'
+        },
         infoType: '',
         showInfo: false,
+        companyModel: false,
         modal_loading: false,
         draftList: [],
         draftColumns: this.getColumns()
@@ -130,47 +183,46 @@
       getColumns () {
         if(columns.draft_columns.length < 6) {
           columns.draft_columns.splice(4,0,{
-              key: 'draft_type',
-              title: '草稿类型',
-              width: 150,
-              render: (h, params) => {
-                const row = params.row;
-                const type = row.draft_type === '1' ? 'primary' :  'success';
-                const text = row.draft_type === '1' ? '客户信息' : '贷款信息';
-                const icon = row.draft_type === '1' ? 'person-stalker' : 'card';
-                // 渲染自定义格式
-                return h('div', [
-                  h('Button', {
-                    props: {
-                      type: type,
-                      size: 'small'
-                    },
-                    style: {
-                      marginRight: '5px'
-                    },
-                    on: {
-                      click: () => {           
-                        this.onShow(params)
-                      }
+            key: 'draft_type',
+            title: '草稿类型',
+            width: 150,
+            render: (h, params) => {
+              const row = params.row;
+              const type = row.draft_type === '1' ? 'primary' :  'success';
+              const text = row.draft_type === '1' ? '客户信息' : '贷款信息';
+              const icon = row.draft_type === '1' ? 'person-stalker' : 'card';
+              // 渲染自定义格式
+              return h('div', [
+                h('Button', {
+                  props: {
+                    type: type,
+                    size: 'small'
+                  },
+                  style: {
+                    marginRight: '5px'
+                  },
+                  on: {
+                    click: () => {           
+                      this.onShow(params)
                     }
-                  },[
-                    h('Icon', {
-                      props: {
-                          type: icon
-                      }
-                    })," " + text
-                  ])
+                  }
+                },[
+                  h('Icon', {
+                    props: {
+                        type: icon
+                    }
+                  })," " + text
                 ])
-              }
+              ])
             }
-          );
+          });
         }
         return columns.draft_columns;
       },
       // 获取草稿列表
       getDraftList (size, num) {
         // 调用后台接口
-        this.$http.get('api/credit/draft/'+ size +'/'+ num)
+        this.$http.get('api/credit/draft/*/'+ size +'/'+ num)
 					.then((res) => {
             // 按状态处理返回结果
 						if(res.status == 200){
@@ -218,13 +270,15 @@
       },
       // 选择日期范围
       handleDate (date) {
-        this.beginDate = date[0];
-        this.endDate = date[1];
-        this.onSearch();
+        this.formSearch.endDate = date;
       },
       // 显示客户相关信息
       onShow (info) {
+        console.dir(info)
         this.infoType = info.row.draft_type;
+        this.modelInfo.customer_name = info.row.cus_name;
+        this.modelInfo.customer_code = info.row.cus_no;
+
         if(info.row.draft_type == '1') {
           this.infos = infos.userInfos;
         } else {
@@ -241,9 +295,18 @@
           this.$Message.success('成功关闭信息窗口！');
         }, 500);
       },
+      // 二级模态窗口确认
+      onSeConfirm () {
+        this.modal_loading = true;
+        setTimeout(() => {
+          this.modal_loading = false;
+          this.companyModel = false;
+          this.$Message.success('成功关闭组织机构窗口！');
+        }, 500);
+      },
       // 搜索事件
       onSearch () {
-        this.$http.get('/api/credit/draft/search/' + 
+        this.$http.get('/api/credit/draft/search/*/' + 
           (this.formSearch.selectType || '*')  + '/' + 
           (this.formSearch.code || '*') + '/' + 
           (this.formSearch.beginDate || '*') + '/' + 
@@ -275,9 +338,3 @@
     }
   }
 </script>
-
-<style lang="less">
-  #i-workbench-draft {
-
-  }
-</style>
