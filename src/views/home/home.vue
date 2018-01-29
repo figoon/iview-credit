@@ -31,11 +31,11 @@
               </Row>
             </Card>
           </Col>
-          <Col :md="12" :lg="24" :style="{marginBottom: '10px',display: 'none'}">
+          <Col :md="12" :lg="24" :style="{marginBottom: '10px'}">
             <Card>
               <p slot="title" class="card-title">
                 <Icon type="android-checkbox-outline"></Icon>
-                待办事项
+                待办业务
               </p>
               <a type="text" slot="extra" @click.prevent="addNewToDoItem">
                 <Icon type="plus-round"></Icon>
@@ -62,43 +62,42 @@
           </Col>
         </Row>
       </Col>
-      <Col :md="24" :lg="16" :style="{display: 'none'}">
+      <Col :md="24" :lg="16">
         <Row :gutter="5">
           <Col :xs="24" :sm="12" :md="6" :style="{marginBottom: '10px'}">
             <infor-card
               id-name="user_created_count"
               :end-val="count.createUser"
-              iconType="android-person-add"
+              iconType="android-person"
               color="#2d8cf0"
-              intro-text="今日新增用户"
+              intro-text="注册客户(总量)"
             ></infor-card>
           </Col>
           <Col :xs="24" :sm="12" :md="6" :style="{marginBottom: '10px'}">
             <infor-card
               id-name="visit_count"
               :end-val="count.visit"
-              iconType="ios-eye"
+              iconType="android-person-add"
               color="#64d572"
-              :iconSize="50"
-              intro-text="今日浏览量"
+              intro-text="新增注册客户(当天)"
             ></infor-card>
           </Col>
           <Col :xs="24" :sm="12" :md="6" :style="{marginBottom: '10px'}">
             <infor-card
               id-name="collection_count"
               :end-val="count.collection"
-              iconType="upload"
+              iconType="checkmark-round"
               color="#ffd572"
-              intro-text="今日数据采集量"
+              intro-text="准入客户(总量)"
             ></infor-card>
           </Col>
           <Col :xs="24" :sm="12" :md="6" :style="{marginBottom: '10px'}">
             <infor-card
               id-name="transfer_count"
               :end-val="count.transfer"
-              iconType="shuffle"
+              iconType="android-hand"
               color="#f25e43"
-              intro-text="今日服务调用量"
+              intro-text="拒绝客户(总量)"
             ></infor-card>
           </Col>
         </Row>
@@ -122,7 +121,7 @@
         </Row>
       </Col>
     </Row>
-    <Row :gutter="10" class="margin-top-10" :style="{display: 'none'}">
+    <Row :gutter="10" class="margin-top-10">
       <Col :md="24" :lg="8" :style="{marginBottom: '10px'}">
         <Card>
           <p slot="title" class="card-title">
@@ -200,26 +199,26 @@
       return {
         toDoList: [
           {
-            title: '去iView官网学习完整的iView组件'
+            title: '待添加功能。。。'
           },
           {
-            title: '去iView官网学习完整的iView组件'
+            title: '待添加功能。。。'
           },
           {
-            title: '去iView官网学习完整的iView组件'
+            title: '待添加功能。。。'
           },
           {
-            title: '去iView官网学习完整的iView组件'
+            title: '待添加功能。。。'
           },
           {
-            title: '去iView官网学习完整的iView组件'
+            title: '待添加功能。。。'
           }
         ],
         count: {
-          createUser: 496,
-          visit: 3264,
-          collection: 24389305,
-          transfer: 39503498
+          createUser: 966,
+          visit: 324,
+          collection: 152,
+          transfer: 234
         },
         cityData: cityData,
         showAddNewTodo: false,

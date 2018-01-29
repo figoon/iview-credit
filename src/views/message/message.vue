@@ -202,9 +202,9 @@ export default {
             // you can write ajax request here to get message content
             let mesContent = '';
             switch (this.currentMessageType + index) {
-                case 'unread0': mesContent = '这是您点击的《欢迎登录iView-admin后台管理系统，来了解他的用途吧》的相关内容。'; break;
-                case 'unread1': mesContent = '这是您点击的《使用iView-admin和iView-ui组件库快速搭建你的后台系统吧》的相关内容。'; break;
-                case 'unread2': mesContent = '这是您点击的《喜欢iView-admin的话，欢迎到github主页给个star吧》的相关内容。'; break;
+                case 'unread0': mesContent = '这是您点击的《运营监控平台数据统计》的相关内容。'; break;
+                case 'unread1': mesContent = '这是您点击的《客户数据》的相关内容。'; break;
+                case 'unread2': mesContent = '这是您点击的《用户管理之权限》的相关内容。'; break;
                 case 'hasread0': mesContent = '这是您点击的《这是一条您已经读过的消息》的相关内容。'; break;
                 default: mesContent = '这是您点击的《这是一条被删除的消息》的相关内容。'; break;
             }
@@ -214,15 +214,15 @@ export default {
     mounted () {
         this.currentMesList = this.unreadMesList = [
             {
-                title: '欢迎登录iView-admin后台管理系统，来了解他的用途吧',
+                title: '运营监控平台数据统计',
                 time: 1507390106000
             },
             {
-                title: '使用iView-admin和iView-ui组件库快速搭建你的后台系统吧',
+                title: '客户数据',
                 time: 1507390106000
             },
             {
-                title: '喜欢iView-admin的话，欢迎到github主页给个star吧',
+                title: '用户管理之权限',
                 time: 1507390106000
             }
         ];
