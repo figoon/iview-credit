@@ -58,7 +58,8 @@
           align: 'center'
         }, {
           title: '机构名称',
-          key:  'orgName'
+          key:  'orgName',
+          width: 300
         }, {
           title: '机构编码',
           key: 'orgCode',
@@ -86,42 +87,57 @@
           }]
         }],
         data: [{
-          id: '0',
+          id: 0,
+          parentId: 0,
           orgCode: '0001',
-          orgName: '测试数据1',
-          grade: '2级',
-          address: '测试数据测试数据'
-        }, {
-          id: '1',
-          orgCode: '0002',
-          orgName: '测试数据2',
+          orgName: 'root',
           grade: '1级',
           address: '测试数据测试数据',
           children: [{
-            id: '0',
-            orgCode: '00001',
-            orgName: '测试数据01',
-            grade: '3级',
-            address: '测试数据测试数据',
+            id: '1001',
+            parentId: '0',
+            orgCode: '0001',
+            orgName: '测试数据1',
+            grade: '2级',
+            address: '测试数据测试数据'
           }, {
-            id: '1',
-            orgCode: '00002',
-            orgName: '测试数据02',
+            id: '1002',
+            parentId: '0',
+            orgCode: '0002',
+            orgName: '测试数据2',
             grade: '1级',
             address: '测试数据测试数据',
-          }]
-        }, {
-          id: '2',
-          orgCode: '0003',
-          orgName: '测试数据3',
-          grade: '2级',
-          address: '测试数据测试数据'
-        }, {
-          id: '3',
-          orgCode: '0004',
-          orgName: '测试数据4',
-          grade: '1级',
-          address: '测试数据测试数据'
+            children: [{
+              id: '1101',
+              parentId: '1002',
+              orgCode: '00001',
+              orgName: '测试数据01',
+              grade: '3级',
+              address: '测试数据测试数据',
+            }, {
+              id: '1102',
+              parentId: '1002',
+              orgCode: '00002',
+              orgName: '测试数据02',
+              grade: '1级',
+              address: '测试数据测试数据',
+            }]
+          }, {
+            id: '1003',
+            parentId: '0',
+            orgCode: '0003',
+            orgName: '测试数据3',
+            grade: '2级',
+            address: '测试数据测试数据'
+          }, {
+            id: '1004',
+            parentId: '0',
+            orgCode: '0004',
+            orgName: '测试数据4',
+            grade: '1级',
+            address: '测试数据测试数据'
+          }],
+          expanded: false
         }]
       }
     },
@@ -155,28 +171,43 @@
         this.activeItem = data.id;
       },
       handleEdit () {
-        this.data[this.activeItem].orgName = this.formOrg.orgName;
-        this.data[this.activeItem].orgCode = this.formOrg.orgCode;
-        this.data[this.activeItem].address = this.formOrg.address;
-        this.data[this.activeItem].grade = this.formOrg.grade;
-        this.data[this.activeItem].phone = this.formOrg.phone;
+        this.callSelf(this.data);
 
         this.$Message.success('修改成功！');
       },
-      handleAdd () {
-        if(!this.data[this.activeItem].children) {
-          this.$set(this.data[this.activeItem], 'children', []);
-        }
-        this.data[this.activeItem].children.push({
-          id: 333,
-          orgCode: this.formOrg.orgCode,
-          orgName: this.formOrg.orgName,
-          grade: this.formOrg.grade,
-          address: this.formOrg.address
+      callSelf (items) {
+        items.forEach((item, index) => {
+          if(item.id == this.activeItem) {
+            if(this.editFlag) {
+              item.orgName = this.formOrg.orgName;
+              item.orgCode = this.formOrg.orgCode;
+              item.address = this.formOrg.address;
+              item.grade = this.formOrg.grade;
+              item.phone = this.formOrg.phone;
+            } else {
+              if(!item.children) {
+                this.$set(item, 'children', []);
+              }
+              item.children.push({
+                id: 333,
+                orgCode: this.formOrg.orgCode,
+                orgName: this.formOrg.orgName,
+                grade: this.formOrg.grade,
+                address: this.formOrg.address
+              })
+            }
+          } else {
+            if(item.children) {
+              this.callSelf(item.children);
+            }
+          }
         })
       },
+      handleAdd () {
+        this.callSelf(this.data);
+        this.$Message.success('添加成功！');
+      },
       selectionClick (arr) {
-        console.log('选中数据id数组:' + arr)
       },
       ok () {
         if(this.editFlag) {

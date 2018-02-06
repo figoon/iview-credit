@@ -90,7 +90,6 @@ export default {
     },
     items: {
       handler() {
-        console.dir(this.items)
         if (this.items) {
           this.dataLength = this.Length(this.items)
           this.initData(this.deepCopy(this.items), 1, null);
@@ -126,6 +125,7 @@ export default {
         this.checks = false
       }
     }
+    // this.toggle(0,this.initItems[0])
     // 绑定onresize事件 监听屏幕变化设置宽
     this.$nextTick(() => {
       this.screenWidth = document.body.clientWidth
@@ -219,6 +219,7 @@ export default {
       for (var i = 1; i < level; i++) {
         spaceHtml += "<i class='ms-tree-space'></i>"
       }
+   
       items.forEach((item, index) => {
         item = Object.assign({}, item, {
           "parent": parent,
@@ -232,7 +233,7 @@ export default {
         }
         if ((typeof item.show) == "undefined") {
           item = Object.assign({}, item, {
-            "isShow": false
+            "isShow": true
           });
         }
         item = Object.assign({}, item, {
@@ -243,6 +244,8 @@ export default {
           this.initData(item.children, level + 1, item);
         }
       })
+      console.dir(this.initItems)
+
     },
     //  隐藏显示
     show(item) {
