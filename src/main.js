@@ -9,8 +9,12 @@ import '@/locale';
 import 'iview/dist/styles/iview.css';
 import VueI18n from 'vue-i18n';
 import util from '@/libs/util';
+import ElementDataset from 'element-dataset';
+// import Promise from 'es6-promise'
 
 Vue.prototype.$http = Axios // 类似于vue-resource的调用方法
+// Promise.polyfill();
+ElementDataset();
 
 Vue.use(VueI18n);
 Vue.use(iView);

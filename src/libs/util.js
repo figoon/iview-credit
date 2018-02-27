@@ -3,7 +3,7 @@ import env from '../../build/env';
 import semver from 'semver';
 import packjson from '../../package.json';
 
-let util = {
+var util = {
 
 };
 util.title = function (title) {

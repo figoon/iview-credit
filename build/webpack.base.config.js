@@ -11,7 +11,7 @@ function resolve (dir) {
 
 module.exports = {
   entry: {
-    main: '@/main',
+    main: ["babel-polyfill", "@/main"],
     'vender-base': '@/vendors/vendors.base.js',
     'vender-exten': '@/vendors/vendors.exten.js'
   },
@@ -46,7 +46,8 @@ module.exports = {
       {
         test: /iview\/.*?js$/,
         loader: 'happypack/loader?id=happybabel',
-        exclude: /node_modules/
+        exclude: /node_modules/,
+        include: resolve('/node_modules/iview/src')
       },
       {
         test: /\.js$/,
