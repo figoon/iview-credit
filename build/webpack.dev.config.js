@@ -28,8 +28,16 @@ module.exports = merge(webpackBaseConfig, {
 		disableHostCheck: true,
 		host: "0.0.0.0",
     proxy: {
-      '/auth':{
-        target: 'http://localhost:8889',
+      '/uaa':{
+        target: 'http://10.100.21.163:8040',
+        changeOrigin: true
+			},
+			'/sys':{
+        target: 'http://10.100.21.163:8040',
+        changeOrigin: true
+			},
+			'/poc':{
+        target: 'http://10.100.21.163:8040',
         changeOrigin: true
       },
       '/api':{
