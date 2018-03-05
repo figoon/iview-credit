@@ -131,7 +131,7 @@
 				this.$store.commit('setMessageCount', 3);
 			},
 			toggleClick () {
-					this.shrink = !this.shrink;
+				this.shrink = !this.shrink;
 			},
 			handleClickUserDropdown (name) {
 				if (name === 'ownSpace') {

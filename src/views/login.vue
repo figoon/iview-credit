@@ -57,7 +57,6 @@ export default {
   methods: {
     // 获取网关服务地址
     getStn (name) {
-      console.warn('请求网关地址：/uaa/stn?userName='+ name)
       return this.$http.get('/uaa/stn?userName='+ name);
     },
     // 获取公钥服务地址
@@ -75,7 +74,7 @@ export default {
                   let salt = stn.data.data.salt; 
                   // bcrypt加密
                   let hash = bcrypt.hashSync(this.form.password, salt); 
-
+                  
                   if(pub_key.data.errcode === "0") {
                     // sessionStorage.setItem('pubKey',pub_key.data.token); 
                     // rsa加密
@@ -84,10 +83,11 @@ export default {
                     if (!pubKey) {
                       this.$Message.error("获取不到公钥，请刷新页面试试");
                     } else {
+                      rsa.setPublicKey(pubKey);
                       // rsa加密
                       let hsn = hash + "," + stn.data.data.timeStamp + "," + stn.data.data.nonce;
                       let pwd = rsa.encrypt(hsn);
-                      console.dir(pwd);
+                      console.dir('最终密码为：'+pwd);
 
                       let user = {
                         username: this.form.userName,
@@ -95,58 +95,45 @@ export default {
                       };
                       this.$http.post('/sys/web/login/li', user) // 将信息发送给后端
                         .then((res) => {
-                          console.dir(res)
-                          if(res.data.errcode === "0") {
+                          if(res.data.errcode === "0") {  // 如果成功
+                            console.dir(res.data)
+                            sessionStorage.setItem('access_token', res.data.data.access_token); // 用sessionStorage把token存下来
+                            // 设置cookie
+                            Cookies.set('user', this.form.userName);
+                            this.$store.commit('setAvator', 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3448484253,3685836170&fm=27&gp=0.jpg');
+                            // 权限测试
+                            if (this.form.userName === 'admin') {
+                              Cookies.set('access', 0);
+                            } else {
+                              Cookies.set('access', 1);
+                            }
 
+                            // 登录成功，显示提示语
+                            this.$Message.success('登陆成功！');
+                            this.easeout = true;
+                            this.zoomout = true;
+                            setTimeout(() => {
+                              // 进入管理页面，登录成功
+                              this.$router.push({
+                                name: 'home_index'
+                              }); 
+                            }, 1800)
                           } else {
+                            sessionStorage.setItem('access_token',null); // 将token清空
                             this.$Message.error(res.data.errmsg);
                           }
                         }, (err) => {
                           this.$Message.error('请求错误！');
-                          sessionStorage.setItem('hdl-token',null); // 将token清空
                         })
                     }
+                  } else {
+                    this.$Message.error('请求pubKey错误！');
                   }
                   
                 }
             }), (err) => {
               this.$Message.error('获取认证服务错误！');
             });
-
-            //   // }
-            //   // if(res.data.success){ // 如果成功
-            //   //   sessionStorage.setItem('hdl-token',res.data.token); // 用sessionStorage把token存下来
-            //   //   // 设置cookie
-            //   //   Cookies.set('user', this.form.userName);
-            //   //   Cookies.set('password', this.form.password);
-            //   //   this.$store.commit('setAvator', 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3448484253,3685836170&fm=27&gp=0.jpg');
-            //   //   // 权限测试
-            //   //   if (this.form.userName === 'admin') {
-            //   //     Cookies.set('access', 1);
-            //   //   } else {
-            //   //     Cookies.set('access', 0);
-            //   //   }
-
-            //   //   // 登录成功，显示提示语
-            //   //   this.$Message.success('登陆成功！');
-            //   //   this.easeout = true;
-            //   //   this.zoomout = true;
-            //   //   setTimeout(() => {
-            //   //     // 进入管理页面，登录成功
-            //   //     this.$router.push({
-            //   //       name: 'home_index'
-            //   //     }); 
-            //   //   }, 1800)
-            //   // }else{
-            //   //   this.load_data = false;
-            //   //   this.$Message.error(res.data.info); // 登录失败，显示提示语
-            //   //   sessionStorage.setItem('hdl-token',null); // 将token清空
-            //   // }
-            // }, (err) => {
-            //   this.$Message.error('请求错误！');
-            //   sessionStorage.setItem('hdl-token',null); // 将token清空
-            // })
-
         }
       });
     }
