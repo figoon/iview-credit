@@ -13,6 +13,20 @@ import ElementDataset from 'element-dataset';
 // import Promise from 'es6-promise'
 
 Vue.prototype.$http = Axios // 类似于vue-resource的调用方法
+// http request 拦截器
+Axios.interceptors.request.use(
+  config => {
+    // 判断是否存在token，如果存在的话，则每个http header都加上token
+    if (store.state.app.token) {  
+      config.headers.Authorization = `${store.state.app.token}`;
+      config.headers.MicroToken = 'eyJhbGciOiJSUzI1NiJ9.eyJpZCI6InByb25nLXRlc3QiLCJleHAiOjM2NjQzNjkzNTV9.alwTkk7trULG23F21wUhO6bQDNBExoAYrn7sZ-tspsOhWZwvu4NRbtOjxRDjVGyPXF0Ms_gozIdpllj0N7j_lYN9HpZOMCN8eyLnAAJvHQKlCX60YOxSC3mAwn7FbWc6oQxx2F742O96oAZINSJMj5NqLV-OOjQ5XpMowx1Sn52IzSTkvATYLPqp9DmHUCcIBsz5sgEnHkWgrodH1KIbTrmWyoWofRxOashcXGPf0a5OIpHXj86sPMvPA91MAwjKnrYieUMKubwFWsV4ui6hpBWb1BlIirqhoZ3HZCl6fNPXMgntFRFGMUaiUNPVFejj6v0cLV74B43ZvHvH5RRyPA';
+    }
+    return config;
+  },
+  err => {
+    return Promise.reject(err);
+});
+
 // Promise.polyfill();
 ElementDataset();
 

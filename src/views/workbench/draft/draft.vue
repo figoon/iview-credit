@@ -141,20 +141,11 @@
         totalNum: 100,
         size: 10,
         formSearch: {
-          cardType: [
-            {
-              value: '10',
-              label: '身份证'
-            },
-            {
-              value: '11',
-              label: '组织机构代码'
-            }
-          ],
+          cardType: columns.card_type,
           selectType: '',
           date: '',
-          beginDate: '20100101',
-          endDate: '20181010',
+          startTime: '',
+          endTime: '',
           code: '',
           name: ''
         },
@@ -183,14 +174,14 @@
       getColumns () {
         if(columns.draft_columns.length < 6) {
           columns.draft_columns.splice(4,0,{
-            key: 'draft_type',
+            key: 'draftType',
             title: '草稿类型',
             width: 150,
             render: (h, params) => {
               const row = params.row;
-              const type = row.draft_type === '1' ? 'primary' :  'success';
-              const text = row.draft_type === '1' ? '客户信息' : '贷款信息';
-              const icon = row.draft_type === '1' ? 'person-stalker' : 'card';
+              const type = row.draftType === '1' ? 'primary' :  'success';
+              const text = row.draftType === '1' ? '客户信息' : '贷款信息';
+              const icon = row.draftType === '1' ? 'person-stalker' : 'card';
               // 渲染自定义格式
               return h('div', [
                 h('Button', {
@@ -220,21 +211,34 @@
         return columns.draft_columns;
       },
       // 获取草稿列表
-      getDraftList (size, num) {
+      getDraftList (size, num, search) {
+
+        let postData = {
+          data: {},
+          pageNum: num,
+          pageSize: size
+        };
+
+        if(search) {
+          postData.data = search;
+        }
+
         // 调用后台接口
-        this.$http.get('api/credit/draft/*/'+ size +'/'+ num)
+        this.$http.post('/poc/draftInfo/list', postData)
 					.then((res) => {
             // 按状态处理返回结果
-						if(res.status == 200){
-              let users = res.data.rows,
-                  user_list = [];
-              this.totalNum = res.data.count;
-              user_list = this.dealDraft(users, user_list);
+            if(res.status == 200) {
+              if(res.data.errcode === "0"){
+                let users = res.data.data.list,
+                    user_list = [];
+                this.totalNum = res.data.data.total;
+                user_list = this.dealDraft(users, user_list);
 
-							this.draftList = user_list;
-						} else{
-							this.$Message.error('获取草稿信息失败！')
-						}
+                this.draftList = user_list;
+              } else{
+                this.$Message.error('获取草稿信息失败！')
+              }
+            }
 					}, (err) => {
 						this.fullscreenLoading = false;
 						this.$Message.error('连接服务器出错！');
@@ -270,16 +274,16 @@
       },
       // 选择日期范围
       handleDate (date) {
-        this.formSearch.endDate = date;
+        this.formSearch.startTime = date+' 00:00:00';
+        this.formSearch.endTime = date+' 23:59:59';
       },
       // 显示客户相关信息
       onShow (info) {
-        console.dir(info)
-        this.infoType = info.row.draft_type;
-        this.modelInfo.customer_name = info.row.cus_name;
-        this.modelInfo.customer_code = info.row.cus_no;
+        this.infoType = info.row.draftType;
+        this.modelInfo.customer_name = info.row.cusName;
+        this.modelInfo.customer_code = info.row.cusNo;
 
-        if(info.row.draft_type == '1') {
+        if(info.row.draftType == '1') {
           this.infos = infos.userInfos;
         } else {
           this.infos = infos.creditInfos;
@@ -306,33 +310,43 @@
       },
       // 搜索事件
       onSearch () {
-        this.$http.get('/api/credit/draft/search/*/' + 
-          (this.formSearch.selectType || '*')  + '/' + 
-          (this.formSearch.code || '*') + '/' + 
-          (this.formSearch.beginDate || '*') + '/' + 
-          (this.formSearch.endDate || '*') + '/' + 
-          (this.formSearch.name || '*'))
-					.then((res) => {
-						if(res.status == 200){
-              let total_num = res.data.length,
-                  users = res.data,
-                  user_list = [];
+        let obj = {
+          certificateType: this.formSearch.selectType || null,
+          certificateCode: this.formSearch.code || null,
+          cusName: this.formSearch.name || "",
+          startTime: this.formSearch.startTime || "",
+          endTime: this.formSearch.endTime || ""
+        };
 
-              user_list = this.dealDraft(users, user_list);
-
-              this.totalNum = total_num;
-              this.draftList = user_list;
-              
-							// this.tags=[{name: '共搜索到 '+total_num+' 个结果', type: 'primary'}]
-						} else{
-							this.$Message.error('获取草稿信息失败！')
-						}
-					}, (err) => {
-						this.$Message.error('连接服务器出错！');
-						console.error(err);
-					})
-      }
+        this.getDraftList(10,1,obj);
+      },
+      formatDate(timestramp){  
+        return new Date(timestramp).Format('yyyy-MM-dd');  
+      },  
+      initFormatter(){  
+        Date.prototype.Format = function(fmt) { //  
+          let o = {    
+              "M+" : this.getMonth()+1,                 //月份    
+              "d+" : this.getDate(),                    //日    
+              "h+" : this.getHours(),                   //小时    
+              "m+" : this.getMinutes(),                 //分    
+              "s+" : this.getSeconds(),                 //秒    
+              "q+" : Math.floor((this.getMonth()+3)/3), //季度    
+              "S"  : this.getMilliseconds()             //毫秒    
+          };    
+          if(/(y+)/.test(fmt))    
+              fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));    
+          for(var k in o)    
+              if(new RegExp("("+ k +")").test(fmt))    
+                  fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));    
+          return fmt;    
+        }  
+      }  
     },
+    created(){  
+      // 为Date 对象添加Format方法
+      this.initFormatter();  
+    },  
     mounted () {
       this.init();
     }

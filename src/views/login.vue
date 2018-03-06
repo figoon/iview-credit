@@ -24,7 +24,10 @@
           </Input>
         </FormItem>
         <FormItem>
-          <Button @click="handleSubmit" type="primary" long>登录</Button>
+          <Button @click="handleSubmit" :loading="loading" type="primary" long>
+            <span v-if="!loading">登录</span>
+            <span v-else>登录中...</span>
+          </Button>
         </FormItem>
       </Form>
     </div>
@@ -40,6 +43,7 @@ export default {
     return {
       easeout: false,
       zoomout: false,
+      loading: false,
       form: {
         userName: '',
         password: ''
@@ -64,6 +68,7 @@ export default {
       return this.$http.get('/uaa/public_key');
     },
     handleSubmit () {
+      this.loading = true;
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
           // 请求服务接口
@@ -96,7 +101,6 @@ export default {
                       this.$http.post('/sys/web/login/li', user) // 将信息发送给后端
                         .then((res) => {
                           if(res.data.errcode === "0") {  // 如果成功
-                            console.dir(res.data)
                             sessionStorage.setItem('access_token', res.data.data.access_token); // 用sessionStorage把token存下来
                             // 设置cookie
                             Cookies.set('user', this.form.userName);
@@ -119,21 +123,27 @@ export default {
                               }); 
                             }, 1800)
                           } else {
+                            this.loading = false;
                             sessionStorage.setItem('access_token',null); // 将token清空
                             this.$Message.error(res.data.errmsg);
                           }
                         }, (err) => {
+                          this.loading = false;
                           this.$Message.error('请求错误！');
                         })
                     }
                   } else {
+                    this.loading = false;
                     this.$Message.error('请求pubKey错误！');
                   }
                   
                 }
             }), (err) => {
+              this.loading = false;
               this.$Message.error('获取认证服务错误！');
             });
+        } else {
+          this.loading = false;
         }
       });
     }

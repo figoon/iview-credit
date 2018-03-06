@@ -37,7 +37,7 @@ module.exports = merge(webpackBaseConfig, {
         changeOrigin: true
 			},
 			'/poc':{
-        target: 'http://10.100.14.83:8040/',
+        target: 'http://10.100.21.163:8989',
         changeOrigin: true
       },
       '/api':{
