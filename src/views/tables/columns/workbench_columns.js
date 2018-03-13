@@ -117,7 +117,7 @@ export const draft_columns = [
   },
   {
     key: 'cusName',
-    title: '客户姓名',
+    title: '客户名称',
     width: 100
   },
   {

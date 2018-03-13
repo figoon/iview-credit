@@ -237,7 +237,7 @@
 
                 this.draftList = user_list;
               } else{
-                this.$Message.error('获取草稿信息失败！')
+                this.$Message.error('获取暂存数据列表出错！')
               }
             }
 					}, (err) => {
@@ -265,16 +265,25 @@
         return arr;
       },
       // 获取码值字典
-      getDraftDict (name) {
+      getDraftDict () {
         // return this.$http.post('/poc/dictionary/getAllDictInfosMap');
         this.$http.get('/poc/dictionary/getAllDictInfosMap')
           .then((res) => {
-            let dictData = dict.data.data;
-            sessionStorage.setItem("draftDict", dictData);
+            let dictData = res.data.data;
+            sessionStorage.setItem("draftDict", JSON.stringify(dictData));
           }, (err) => {
 						this.$Message.error('获取字典数据发生错误！');
 						console.error(err);
 					})
+      },
+      // 返回码值字典
+      returnDict (name) {
+        let dictData = sessionStorage.getItem("draftDict");
+        if(dictData === null){
+          return false
+        } else {
+          return JSON.parse(dictData);
+        }
       },
       // 获取客户信息数据
       getUserInfo () {
@@ -282,11 +291,11 @@
       },
       // 客户类型信息
       dealUserInfo () {
-        this.$http.all([this.getUserInfo(), this.getUserDict()])
+        this.$http.all([this.getUserInfo(), this.returnDict()])
           .then(this.$http.spread((user, dict) => {
             if(user.data.errcode === "0") {
               let userData = user.data.data,
-                  dictData = dict.data.data;
+                  dictData = dict;
               
               // 拼装数据
               let userInfos = {
@@ -328,8 +337,8 @@
                   '单位电话': userData.cropTelephone
                 },
                 '所属实体经营信息': {
-                  '实体经营客户名': userData.corpCustmer_name ,
-                  '实体经营客户编号': userData.corpCustmer_no,
+                  '实体经营客户名': userData.corpCustmerName ,
+                  '实体经营客户编号': userData.corpCustmerNo,
                   '证件类型': '营业执照',
                   '证件号码': '283712837491827358',
                   '证件有效止期': '2089-12-31',
@@ -341,7 +350,7 @@
                 }
               }
 
-              return userInfos;
+              this.infos = userInfos;
             }
           }), (err) => {
 						this.fullscreenLoading = false;
@@ -406,89 +415,88 @@
 						console.error(err);
 					})
       },
-      // 获取贷款码值字典
-      getCreditDict (name) {
-        return this.$http.get('/poc/tpCmnCodes/getAllDictInfosMap');
-      },
+
       // 获取贷款信息数据
       getCreditInfos (lineNum) {
         return this.$http.get('/poc/loan/getLoanInfo/'+ lineNum);
       },
       // 贷款类型信息
-      dealCreditInfos () {
-        this.$http.all([this.getCreditInfos(), this.getCreditDict()])
+      dealCreditInfos (lineNum) {
+        this.$http.all([this.getCreditInfos(lineNum), this.returnDict()])
           .then(this.$http.spread((credit, dict) => {
             if(credit.data.errcode === "0") {
               let creditData = credit.data.data,
-                  dictData = dict.data.data;
+                  dictData = dict;
               
               let creditInfos = {
                 '贷款信息': {
-                  '产品种类': dictData['AppParentCd'][creditData.productName],
-                  '额度类别': dictData['LineTypeCd'][creditData.lineType],
-                  '授信额度': creditData.lineAmount,
-                  '可用额度': creditData.lineBalance,
-                  '额度期限': creditData.linePeriod,
-                  '币种': dictData['CurrencyCd'][creditData.currency],
-                  '支用期限': creditData.lineAjustendDate,
-                  '贷款金额': creditData.loanAmount,
-                  '贷款期限': creditData.loanLength,
-                  '还款来源': dictData['RepaySourceCd'][creditData.repaySource],
-                  '居住户籍': dictData['IsInTownCd'][creditData.isInTown],
-                  '是否符合财税农户标准': creditData.isFitFarmerStand,
-                  '是否创业贷款': creditData.isCarveOutLoan,
-                  '营销渠道': dictData['SalesChannelCd'][creditData.salesChannel],
+                  '产品种类': dictData['AppParentCd'][creditData.tbLnLoan.productName],
+                  '额度类别': creditData.tbLnLoan.lineType,//dictData['LineTypeCd'][creditData.tbLnLoan.lineType],
+                  '授信额度': creditData.tbLnLoan.lineAmount,
+                  '可用额度': creditData.tbLnLoan.lineBalance,
+                  '额度期限': creditData.tbLnLoan.linePeriod,
+                  '币种': dictData['CurrencyCd'][creditData.tbLnLoan.currency],
+                  '支用期限': creditData.tbLnLoan.lineAjustendDate,
+                  '贷款金额': creditData.tbLnLoan.loanAmount,
+                  '贷款期限': creditData.tbLnLoan.loanLength,
+                  '还款来源': dictData['RepaySourceCd'][creditData.tbLnLoan.repaySource],
+                  '居住户籍': dictData['IsInTownCd'][creditData.tbLnLoan.isInTown],
+                  '是否符合财税农户标准': creditData.tbLnLoan.isFitFarmerStand,
+                  '是否创业贷款': creditData.tbLnLoan.isCarveOutLoan,
+                  '营销渠道': dictData['SalesChannelCd'][creditData.tbLnLoan.salesChannel],
                   '营销网点': dictData['SalesInterbranchCd'][creditData.salesInterbranch]
                 },
                 '还款信息': {
-                  '还款方式': dictData['RepayKindCd'][creditData.repayKind],
-                  '月还款额': creditData.monthlyReturn,
-                  '固定还款日': creditData.repayDay,
-                  '首次还本': creditData.beginTerm,
-                  '期还款额': creditData.repayAmount,
-                  '月贷期限': creditData.endTerm,
-                  '最低限额': creditData.advanceRepayAmount,
-                  '是否收取违约金': creditData.isGetPrerepayForfeit,
-                  '收取方式': dictData['PrerepayTypeCd'][creditData.prerepayType],
-                  '收取金额': creditData.prerepayAmount,
-                  '收取比例': creditData.prepaymentForeeitRate
+                  '还款方式': dictData['RepayKindCd'][creditData.tbLnLoan.repayKind],
+                  '月还款额': creditData.tbLnLoan.monthlyReturn,
+                  '固定还款日': creditData.tbLnLoan.repayDay,
+                  '首次还本': creditData.tbLnLoan.beginTerm,
+                  '期还款额': creditData.tbLnLoan.repayAmount,
+                  '月贷期限': creditData.tbLnLoan.endTerm,
+                  '最低限额': creditData.tbLnLoan.advanceRepayAmount,
+                  '是否收取违约金': creditData.tbLnLoan.isGetPrerepayForfeit,
+                  '收取方式': dictData['PrerepayTypeCd'][creditData.tbLnLoan.prerepayType],
+                  '收取金额': creditData.tbLnLoan.prerepayAmount,
+                  '收取比例': creditData.tbLnLoan.prepaymentForeeitRate
                 },
                 '担保信息': {
-                  '担保方式': dictData['GroupSecurityCd'][creditData.groupSecurityType],
-                  '组合担保': dictData['ComSecurityCd'][creditData.comSecurityKind],
-                  '用途类型': dictData['LoanPurposeCd'][creditData.loanPurposeKind],
-                  '是否系统内贴息': creditData.isDiscount,
-                  '最高限额': creditData.maxDiscountAmount,
-                  '贴息模式': dictData['DiscountModeCd'][creditData.discountMode],
-                  '贴息金额': creditData.settledDiscountAmount,
-                  '贴息比例': creditData.fixedDiscountRate,
-                  '贴息方式': dictData['DiscountKindCd'][creditData.discountSubKind],
-                  '扣划时点': dictData['DiscountTimeCd'][creditData.discountRepaymentTime],
-                  '账户类型': dictData['DiscountTypeCd'][creditData.discountType],
-                  '贴息账号': creditData.discountAccNum,
-                  '起始日期': creditData.discountBeginDate,
-                  '终止日期': creditData.discountEndDate
+                  '担保方式': dictData['GroupSecurityCd'][creditData.tbLnLoan.groupSecurityType],
+                  '组合担保': dictData['ComSecurityCd'][creditData.tbLnLoan.comSecurityKind],
+                  '用途类型': dictData['LoanPurposeCd'][creditData.tbLnLoan.loanPurposeKind],
+                  '是否系统内贴息': creditData.tbLnLoan.isDiscount,
+                  '最高限额': creditData.tbLnLoan.maxDiscountAmount,
+                  '贴息模式': dictData['DiscountModeCd'][creditData.tbLnLoan.discountMode],
+                  '贴息金额': creditData.tbLnLoan.settledDiscountAmount,
+                  '贴息比例': creditData.tbLnLoan.fixedDiscountRate,
+                  '贴息方式': dictData['DiscountKindCd'][creditData.tbLnLoan.discountSubKind],
+                  '扣划时点': dictData['DiscountTimeCd'][creditData.tbLnLoan.discountRepaymentTime],
+                  '账户类型': dictData['DiscountTypeCd'][creditData.tbLnLoan.discountType],
+                  '贴息账号': creditData.tbLnLoan.discountAccNum,
+                  '起始日期': creditData.tbLnLoan.discountBeginDate,
+                  '终止日期': creditData.tbLnLoan.discountEndDate
                 },
                 '利率信息': {
-                  '产品利率': creditData.productRate,
-                  '定价方式': dictData['RatePriceCd'][creditData.ratePriceKind],
-                  '是否分段': creditData.isAutoChgFa,
-                  '浮动比例': creditData.floatingRatio,
-                  '浮动起期': creditData.floatingCreate,
-                  '浮动止期': creditData.floatingFinish,
-                  '加点幅度': creditData.floatingValue,
-                  '加点起期': creditData.floatValueCreate,
-                  '加点止期': creditData.floatValueFinish,
-                  '执行利率': creditData.loanRate,
-                  '罚息利率': creditData.overdueRate,
-                  '结息周期': dictData['InterestCycleCd'][creditData.interestCleanCycle],
-                  '结息方式': dictData['InterestKindCd'][creditData.interestCleanKind],
-                  '调整方式': dictData['RateAdjustCd'][creditData.rateAdjustKind]
+                  '产品利率': creditData.tbLnLoan.productRate,
+                  '定价方式': dictData['RatePriceCd'][creditData.tbLnLoan.ratePriceKind],
+                  '是否分段': creditData.tbLnLoan.isAutoChgFa,
+                  '浮动比例': creditData.tbLnLoan.floatingRatio,
+                  '浮动起期': creditData.tbLnLoan.floatingCreate,
+                  '浮动止期': creditData.tbLnLoan.floatingFinish,
+                  '加点幅度': creditData.tbLnLoan.floatingValue,
+                  '加点起期': creditData.tbLnLoan.floatValueCreate,
+                  '加点止期': creditData.tbLnLoan.floatValueFinish,
+                  '执行利率': creditData.tbLnLoan.loanRate,
+                  '罚息利率': creditData.tbLnLoan.overdueRate,
+                  '结息周期': dictData['InterestCycleCd'][creditData.tbLnLoan.interestCleanCycle],
+                  '结息方式': dictData['InterestKindCd'][creditData.tbLnLoan.interestCleanKind],
+                  '调整方式': dictData['RateAdjustCd'][creditData.tbLnLoan.rateAdjustKind]
                 },
                 '影像信息': {
                   'info': '影像资料'
                 }
               };
+
+              this.infos = creditInfos;
             }
           }), (err) => {
             this.fullscreenLoading = false;
@@ -516,9 +524,9 @@
         this.modelInfo.customer_code = info.row.cusNo;
 
         if(info.row.draftType == '1') {
-          this.infos = this.dealUserInfo();
+          this.dealUserInfo();
         } else {
-          this.infos = this.dealCreditInfos();
+          this.dealCreditInfos(info.row.lineNum);
         }
         this.showInfo = true;
       },
