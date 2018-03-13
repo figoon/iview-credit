@@ -29,15 +29,15 @@ module.exports = merge(webpackBaseConfig, {
 		host: "0.0.0.0",
     proxy: {
       '/uaa':{
-        target: 'http://10.100.14.83:8040/',
+        target: 'http://27.154.58.94:30005/',
         changeOrigin: true
 			},
 			'/sys':{
-        target: 'http://10.100.14.83:8040/',
+        target: 'http://27.154.58.94:30005/',
         changeOrigin: true
 			},
 			'/poc':{
-        target: 'http://10.100.21.163:8989',
+        target: 'http://27.154.58.94:30005/',
         changeOrigin: true
       },
       '/api':{

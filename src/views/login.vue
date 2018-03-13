@@ -98,7 +98,7 @@ export default {
                         username: this.form.userName,
                         password: pwd
                       };
-                      this.$http.post('/sys/web/login/li', user) // 将信息发送给后端
+                      this.$http.post('/poc/login', user) // 将信息发送给后端
                         .then((res) => {
                           if(res.data.errcode === "0") {  // 如果成功
                             sessionStorage.setItem('access_token', res.data.data.access_token); // 用sessionStorage把token存下来
@@ -106,7 +106,7 @@ export default {
                             Cookies.set('user', this.form.userName);
                             this.$store.commit('setAvator', 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3448484253,3685836170&fm=27&gp=0.jpg');
                             // 权限测试
-                            if (this.form.userName === 'admin') {
+                            if (this.form.userName !== 'seadon') {
                               Cookies.set('access', 0);
                             } else {
                               Cookies.set('access', 1);

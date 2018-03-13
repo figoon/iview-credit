@@ -11,7 +11,7 @@
             <Row :gutter="10">
               <Col span="5">
                 <FormItem label="证件类型" :label-width="75">
-                  <Select v-model="formSearch.selectType">
+                  <Select clearable v-model="formSearch.selectType">
                     <Option v-for="item in formSearch.cardType" :value="item.value" :key="item.value">{{ item.label }}</Option>
                   </Select>
                 </FormItem>
@@ -22,7 +22,7 @@
                 </FormItem>
               </Col>
               <Col span="6">
-                <FormItem label="日期范围" :label-width="75">
+                <FormItem label="受理时间" :label-width="75">
                   <DatePicker type="date" placement="bottom-end" placeholder="选择日期" v-model="formSearch.date" @on-change="handleDate"></DatePicker>              
                 </FormItem>
               </Col>
@@ -82,7 +82,7 @@
                 :name="key">
                 <Row type="flex" justify="start" :gutter="20">
                   <Col span="12" v-for="(value, key) in info" :key="key">
-                    <p v-if="key=='实体经营客户名'">{{key}}： <Button type="primary" size="small" @click="companyModal = true">{{value}}</Button></p>
+                    <p v-if="key=='实体经营客户名'">{{key}}： <Button type="primary" size="small" @click="getCustomerCrop">{{value}}</Button></p>
                     <p v-else>{{key}}：{{value}}</p>
                   </Col>
                 </Row>
@@ -169,6 +169,7 @@
       init () {
         // 获取用户列表
         this.getDraftList(10, 1);
+        this.getDraftDict();
       },
       // 动态插入表格列
       getColumns () {
@@ -180,7 +181,7 @@
             render: (h, params) => {
               const row = params.row;
               const type = row.draftType === '1' ? 'primary' :  'success';
-              const text = row.draftType === '1' ? '客户信息' : '贷款信息';
+              const text = row.draftType === '1' ? '客户类型' : '贷款类型';
               const icon = row.draftType === '1' ? 'person-stalker' : 'card';
               // 渲染自定义格式
               return h('div', [
@@ -263,6 +264,237 @@
 
         return arr;
       },
+      // 获取码值字典
+      getDraftDict (name) {
+        // return this.$http.post('/poc/dictionary/getAllDictInfosMap');
+        this.$http.get('/poc/dictionary/getAllDictInfosMap')
+          .then((res) => {
+            let dictData = dict.data.data;
+            sessionStorage.setItem("draftDict", dictData);
+          }, (err) => {
+						this.$Message.error('获取字典数据发生错误！');
+						console.error(err);
+					})
+      },
+      // 获取客户信息数据
+      getUserInfo () {
+        return this.$http.get('/poc/getCustomerInfoByCusNo?cusNo=A01H17122801223');
+      },
+      // 客户类型信息
+      dealUserInfo () {
+        this.$http.all([this.getUserInfo(), this.getUserDict()])
+          .then(this.$http.spread((user, dict) => {
+            if(user.data.errcode === "0") {
+              let userData = user.data.data,
+                  dictData = dict.data.data;
+              
+              // 拼装数据
+              let userInfos = {
+                '基本信息': {
+                  '证件类型': dictData['CertificateTypeCd'][userData.certificateType],
+                  '证件号码': userData.certificateCode,
+                  '是否长期有效': userData.is_longTime,
+                  '证件有效期': userData.certificateValid_deadline,
+                  '国家地区': userData.countryDistrict,
+                  '民族': dictData['NationalityCd'][userData.nationality],
+                  '户籍区划': userData.nativePlaceCode,
+                  '户籍地址': userData.nativePlace,
+                  '是否本地户口': userData.isNativeAccount,
+                  '最高学历': dictData['DegreeCd'][userData.degree],
+                  '婚姻状况': dictData['MaritalStatusCd'][userData.maritalStatus],
+                  '移动电话': userData.mobilePhone,
+                  '健康状况': dictData['HealthStatusCd'][userData.healthStatus],
+                  '客户标识': dictData['CusLabelCd'][userData.cusLabel],
+                },
+                '地址信息': {
+                  '住所邮编': userData.residencePostcode,
+                  '居住年限': userData.nativeLiveTime,
+                  '通讯地址': dictData['ConnectAddressCd'][userData.isConnectAddress],
+                  '是否本行关系人': userData.bankEmployeeFlag,
+                  '住宅区划': userData.domicileAdministrativeDistri,
+                  '住宅地址': userData.registeredAddress,
+                  '住宅街道': userData.residenceStreetName,
+                  '住宅电话': userData.residenceTelephone
+                },
+                '职业信息': {
+                  '电子邮箱': userData.email,
+                  '行业类别': dictData['WorkCorpTypeCd'][userData.workCorpType],
+                  '就业类别': userData.employmentType,
+                  '职业': dictData['MetierCd'][userData.metier],
+                  '单位地址': userData.cropAddress,
+                  '职称': dictData['JobtitleCd'][userData.jobtitle],
+                  '职务': dictData['JobpositionCd'][userData.jobposition],
+                  '从业年限': userData.tradeWorkYears,
+                  '单位电话': userData.cropTelephone
+                },
+                '所属实体经营信息': {
+                  '实体经营客户名': userData.corpCustmer_name ,
+                  '实体经营客户编号': userData.corpCustmer_no,
+                  '证件类型': '营业执照',
+                  '证件号码': '283712837491827358',
+                  '证件有效止期': '2089-12-31',
+                  '贷款卡号': '12321928319285',
+                  '组织机构代码': '89347628'
+                },
+                '影像信息': {
+                  'info': '影像资料'
+                }
+              }
+
+              return userInfos;
+            }
+          }), (err) => {
+						this.fullscreenLoading = false;
+						this.$Message.error('连接服务器出错！');
+        	})
+
+      },
+      // 获取袱经营客户信息
+      getCustomerCrop () {
+        this.$http.get('customerCrop/getCustomerCrop')
+          .then((res) => {
+            let corpData = res.data.data,
+                dictData = dict.data.data;
+
+            let customerCrop =  {
+              '基本信息': {
+                '实体经营客户名': corpData.corpCustmerName,
+                '实体经营客户编号': corpData.corpCustmerNo,
+                '证件类型': corpData.certificateType,
+                '证件号码': corpData.certificateCode,
+                '证件有效止期': corpData.certificateValidDeadline,
+                '贷款卡号': corpData.loancardNo,
+                '组织机构代码': corpData.corpCode,
+                '客户类型': dictData['CorpTypeCd'][corpData.corpType],
+                '授信额度': corpData.lineAmount,
+                '客户政策': dictData['CreditPolicyCd'][corpData.creditPolicy],
+                '客户状态': dictData['CusClassCd'][corpData.cusClass]
+              },
+              '企业信息': {
+                '经济性质': dictData['EcoTypeCd'][corpData.ecoType],
+                '营业期限': corpData.businessTerm,
+                '员工人数': corpData.staff,
+                '职场面积': corpData.workArea,
+                '职场属权': dictData['WorkDutyCd'][corpData.workDuty],
+                '注册资本': corpData.registeredCapital,
+                '单位地址': corpData.runAddress,
+                '登记注册号码': corpData.registerCode,
+                '公司邮箱': corpData.email,
+                '法定代表人': corpData.legalRepresentative,
+                '成立时间': corpData.createTime,
+                '国家地区': corpData.countryDistrict
+              },
+              '行业信息': {
+                '注册类型': corpData['RegisterTypeCd'][corpData.registerType],
+                '行业大类': corpData['WorkCorpTypeCd'][corpData.workcorpType],
+                '行业中类': corpData['WorkcorpMiddleType'][corpData.workcorpMiddleType],
+                '行业小类': corpData['WorkcorpSubdType'][corpData.workcorpSubdType],
+                '是否有进出口权': corpData.exImrightsflag,
+                '是否上市公司': corpData.quotedcompanyFlag,
+                '是否集团客户': corpData.groupcorpFlag,
+                '是否签定银企合作协议': corpData.bankEnterpriseCoopAgreement,
+                '是否高新企业': corpData.advancedCorp,
+                '农业产业化标志': corpData.agricultureFlag
+              },
+              '影像信息': {
+                'info': '影像资料'
+              }
+            }
+
+          }, (err) => {
+						this.$Message.error('连接服务器出错！');
+						console.error(err);
+					})
+      },
+      // 获取贷款码值字典
+      getCreditDict (name) {
+        return this.$http.get('/poc/tpCmnCodes/getAllDictInfosMap');
+      },
+      // 获取贷款信息数据
+      getCreditInfos (lineNum) {
+        return this.$http.get('/poc/loan/getLoanInfo/'+ lineNum);
+      },
+      // 贷款类型信息
+      dealCreditInfos () {
+        this.$http.all([this.getCreditInfos(), this.getCreditDict()])
+          .then(this.$http.spread((credit, dict) => {
+            if(credit.data.errcode === "0") {
+              let creditData = credit.data.data,
+                  dictData = dict.data.data;
+              
+              let creditInfos = {
+                '贷款信息': {
+                  '产品种类': dictData['AppParentCd'][creditData.productName],
+                  '额度类别': dictData['LineTypeCd'][creditData.lineType],
+                  '授信额度': creditData.lineAmount,
+                  '可用额度': creditData.lineBalance,
+                  '额度期限': creditData.linePeriod,
+                  '币种': dictData['CurrencyCd'][creditData.currency],
+                  '支用期限': creditData.lineAjustendDate,
+                  '贷款金额': creditData.loanAmount,
+                  '贷款期限': creditData.loanLength,
+                  '还款来源': dictData['RepaySourceCd'][creditData.repaySource],
+                  '居住户籍': dictData['IsInTownCd'][creditData.isInTown],
+                  '是否符合财税农户标准': creditData.isFitFarmerStand,
+                  '是否创业贷款': creditData.isCarveOutLoan,
+                  '营销渠道': dictData['SalesChannelCd'][creditData.salesChannel],
+                  '营销网点': dictData['SalesInterbranchCd'][creditData.salesInterbranch]
+                },
+                '还款信息': {
+                  '还款方式': dictData['RepayKindCd'][creditData.repayKind],
+                  '月还款额': creditData.monthlyReturn,
+                  '固定还款日': creditData.repayDay,
+                  '首次还本': creditData.beginTerm,
+                  '期还款额': creditData.repayAmount,
+                  '月贷期限': creditData.endTerm,
+                  '最低限额': creditData.advanceRepayAmount,
+                  '是否收取违约金': creditData.isGetPrerepayForfeit,
+                  '收取方式': dictData['PrerepayTypeCd'][creditData.prerepayType],
+                  '收取金额': creditData.prerepayAmount,
+                  '收取比例': creditData.prepaymentForeeitRate
+                },
+                '担保信息': {
+                  '担保方式': dictData['GroupSecurityCd'][creditData.groupSecurityType],
+                  '组合担保': dictData['ComSecurityCd'][creditData.comSecurityKind],
+                  '用途类型': dictData['LoanPurposeCd'][creditData.loanPurposeKind],
+                  '是否系统内贴息': creditData.isDiscount,
+                  '最高限额': creditData.maxDiscountAmount,
+                  '贴息模式': dictData['DiscountModeCd'][creditData.discountMode],
+                  '贴息金额': creditData.settledDiscountAmount,
+                  '贴息比例': creditData.fixedDiscountRate,
+                  '贴息方式': dictData['DiscountKindCd'][creditData.discountSubKind],
+                  '扣划时点': dictData['DiscountTimeCd'][creditData.discountRepaymentTime],
+                  '账户类型': dictData['DiscountTypeCd'][creditData.discountType],
+                  '贴息账号': creditData.discountAccNum,
+                  '起始日期': creditData.discountBeginDate,
+                  '终止日期': creditData.discountEndDate
+                },
+                '利率信息': {
+                  '产品利率': creditData.productRate,
+                  '定价方式': dictData['RatePriceCd'][creditData.ratePriceKind],
+                  '是否分段': creditData.isAutoChgFa,
+                  '浮动比例': creditData.floatingRatio,
+                  '浮动起期': creditData.floatingCreate,
+                  '浮动止期': creditData.floatingFinish,
+                  '加点幅度': creditData.floatingValue,
+                  '加点起期': creditData.floatValueCreate,
+                  '加点止期': creditData.floatValueFinish,
+                  '执行利率': creditData.loanRate,
+                  '罚息利率': creditData.overdueRate,
+                  '结息周期': dictData['InterestCycleCd'][creditData.interestCleanCycle],
+                  '结息方式': dictData['InterestKindCd'][creditData.interestCleanKind],
+                  '调整方式': dictData['RateAdjustCd'][creditData.rateAdjustKind]
+                },
+                '影像信息': {
+                  'info': '影像资料'
+                }
+              };
+            }
+          }), (err) => {
+            this.fullscreenLoading = false;
+            this.$Message.error('连接服务器出错！');
+          })
+      },
       // 页码切换回调
       handleCurrentChange (num) {
         this.getDraftList(this.size, num);
@@ -284,9 +516,9 @@
         this.modelInfo.customer_code = info.row.cusNo;
 
         if(info.row.draftType == '1') {
-          this.infos = infos.userInfos;
+          this.infos = this.dealUserInfo();
         } else {
-          this.infos = infos.creditInfos;
+          this.infos = this.dealCreditInfos();
         }
         this.showInfo = true;
       },
@@ -326,19 +558,19 @@
       initFormatter(){  
         Date.prototype.Format = function(fmt) { //  
           let o = {    
-              "M+" : this.getMonth()+1,                 //月份    
-              "d+" : this.getDate(),                    //日    
-              "h+" : this.getHours(),                   //小时    
-              "m+" : this.getMinutes(),                 //分    
-              "s+" : this.getSeconds(),                 //秒    
-              "q+" : Math.floor((this.getMonth()+3)/3), //季度    
-              "S"  : this.getMilliseconds()             //毫秒    
+            "M+" : this.getMonth()+1,                 //月份    
+            "d+" : this.getDate(),                    //日    
+            "h+" : this.getHours(),                   //小时    
+            "m+" : this.getMinutes(),                 //分    
+            "s+" : this.getSeconds(),                 //秒    
+            "q+" : Math.floor((this.getMonth()+3)/3), //季度    
+            "S"  : this.getMilliseconds()             //毫秒    
           };    
           if(/(y+)/.test(fmt))    
-              fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));    
+            fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));    
           for(var k in o)    
-              if(new RegExp("("+ k +")").test(fmt))    
-                  fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));    
+            if(new RegExp("("+ k +")").test(fmt))    
+                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));    
           return fmt;    
         }  
       }  
