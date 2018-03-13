@@ -147,34 +147,30 @@ export const draft_columns = [
 
 export const user_columns = [
   {
-    key: 'area',
+    key: 'city',
     title: '地理区域',
     width: 110
   },
   {
-    key: 'user_type',
+    key: 'isCorpCustomer',
     title: '客户类型',
     width: 130
   },
   {
-    key: 'date',
-    title: '日期',
-    width: 100
-  },
-  {
-    key: 'reg_num',
+    key: 'totalCount',
     title: '注册客户(总量)'
   },
   {
-    key: 'add_num',
-    title: '新增注册客户(当天)'
+    key: 'todayCount',
+    title: '新增注册客户(当天)',
+    width: 150
   },
   {
-    key: 'access_num',
+    key: 'accessCount',
     title: '准入客户(总量)'
   },
   {
-    key: 'deny_num',
+    key: 'refuseCount',
     title: '拒绝客户(总量)'
   }
 ]

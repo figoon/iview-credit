@@ -53,21 +53,7 @@
 
 <script>
   import * as columns from '../../tables/columns/workbench_columns';  
-  import Mock from 'mockjs'; // 模拟数据
   import util from '@/libs/util.js';
-
-  Mock.mock('User/users', {
-    count: 111,
-    'rows|10': [{
-      'area': '@province',
-      'user_type': '@cword(7)',
-      'date': '@date',
-      'reg_num|100-4000': 10000,
-      'add_num|100-4000': 10000, 
-      'access_num|100-4000': 10000,
-      'deny_num|100-4000': 10000
-    }]
-  })
 
   export default {
     data () {
@@ -190,11 +176,11 @@
       // 获取用户列表
       getUserList (size, num, id) {
         //调用后台接口
-        this.$http.get('User/users') //'/api/actdetails/'+ size +'/'+ num +'/'+ id)
+        this.$http.get('/poc/visualization/getPocCustomerCount')
 					.then((res) => {
             // 按状态处理返回结果
 						if(res.status == 200){
-              let users = res.data.rows,
+              let users = res.data.data,
                   user_list = [];
               this.totalNum = res.data.count;
 
@@ -204,8 +190,14 @@
 
                 // 格式化用户数据
                 for(let key of Object.keys(user)) {
-                  if(key !== 'operator') {
+                  if(key !== 'isCorpCustomer') {
                     _user[key] = user[key]; 
+                  } else {
+                    if(user[key]=='0') {
+                      _user[key] = '自然人客户';
+                    } else {
+                      _user[key] = '实体经营客户';
+                    }
                   }
                 };
 
