@@ -358,9 +358,9 @@
         	})
 
       },
-      // 获取袱经营客户信息
+      // 获取经营客户信息
       getCustomerCrop () {
-        this.$http.get('customerCrop/getCustomerCrop')
+        this.$http.get('/poc/customerCrop/getCustomerCrop')
           .then((res) => {
             let corpData = res.data.data,
                 dictData = dict.data.data;
