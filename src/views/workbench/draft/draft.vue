@@ -150,7 +150,7 @@
           name: ''
         },
         infos: {},
-        comInfos: infos.companyInfos,
+        comInfos: {},
         modelInfo: {
           customer_name: '',
           customer_code: '',
@@ -359,58 +359,70 @@
 
       },
       // 获取经营客户信息
+      getCustomerInfo () {
+        return this.$http.get('/poc/customerCrop/getCustomerCropByNo?corpCusNo=A01H17122801223');
+      },
+      // 经营客户信息处理
       getCustomerCrop () {
-        this.$http.get('/poc/customerCrop/getCustomerCrop')
-          .then((res) => {
-            let corpData = res.data.data,
-                dictData = dict.data.data;
+        this.$http.all([this.getCustomerInfo(), this.returnDict()])
+          .then(this.$http.spread((crop, dict) => {
+            if(crop.data.errcode === "0") {
+              let corpData = crop.data.data,
+                  dictData = dict;
 
-            let customerCrop =  {
-              '基本信息': {
-                '实体经营客户名': corpData.corpCustmerName,
-                '实体经营客户编号': corpData.corpCustmerNo,
-                '证件类型': corpData.certificateType,
-                '证件号码': corpData.certificateCode,
-                '证件有效止期': corpData.certificateValidDeadline,
-                '贷款卡号': corpData.loancardNo,
-                '组织机构代码': corpData.corpCode,
-                '客户类型': dictData['CorpTypeCd'][corpData.corpType],
-                '授信额度': corpData.lineAmount,
-                '客户政策': dictData['CreditPolicyCd'][corpData.creditPolicy],
-                '客户状态': dictData['CusClassCd'][corpData.cusClass]
-              },
-              '企业信息': {
-                '经济性质': dictData['EcoTypeCd'][corpData.ecoType],
-                '营业期限': corpData.businessTerm,
-                '员工人数': corpData.staff,
-                '职场面积': corpData.workArea,
-                '职场属权': dictData['WorkDutyCd'][corpData.workDuty],
-                '注册资本': corpData.registeredCapital,
-                '单位地址': corpData.runAddress,
-                '登记注册号码': corpData.registerCode,
-                '公司邮箱': corpData.email,
-                '法定代表人': corpData.legalRepresentative,
-                '成立时间': corpData.createTime,
-                '国家地区': corpData.countryDistrict
-              },
-              '行业信息': {
-                '注册类型': corpData['RegisterTypeCd'][corpData.registerType],
-                '行业大类': corpData['WorkCorpTypeCd'][corpData.workcorpType],
-                '行业中类': corpData['WorkcorpMiddleType'][corpData.workcorpMiddleType],
-                '行业小类': corpData['WorkcorpSubdType'][corpData.workcorpSubdType],
-                '是否有进出口权': corpData.exImrightsflag,
-                '是否上市公司': corpData.quotedcompanyFlag,
-                '是否集团客户': corpData.groupcorpFlag,
-                '是否签定银企合作协议': corpData.bankEnterpriseCoopAgreement,
-                '是否高新企业': corpData.advancedCorp,
-                '农业产业化标志': corpData.agricultureFlag
-              },
-              '影像信息': {
-                'info': '影像资料'
+                  console.dir(corpData)
+                  console.dir(dictData)
+
+              let customerCrop =  {
+                '基本信息': {
+                  '实体经营客户名': corpData.cusName,
+                  '实体经营客户编号': corpData.corpCustmerNo,
+                  '证件类型': corpData.certificateType,
+                  '证件号码': corpData.certificateCode,
+                  '证件有效止期': corpData.certificateValidDeadline,
+                  '贷款卡号': corpData.loancardNo,
+                  '组织机构代码': corpData.corpCode,
+                  '客户类型': dictData['CorpTypeCd'][corpData.corpType],
+                  '授信额度': corpData.lineAmount,
+                  '客户政策': dictData['CreditPolicyCd'][corpData.creditPolicy],
+                  '客户状态': dictData['CusClassCd'][corpData.cusClass]
+                },
+                '企业信息': {
+                  '经济性质': dictData['EcoTypeCd'][corpData.ecoType] || '值错误',
+                  '营业期限': corpData.businessTerm,
+                  '员工人数': corpData.staff,
+                  '职场面积': corpData.workArea,
+                  '职场属权': dictData['WorkDutyCd'][corpData.workDuty],
+                  '注册资本': corpData.registeredCapital,
+                  '单位地址': corpData.runAddress,
+                  '登记注册号码': corpData.registerCode,
+                  '公司邮箱': corpData.email,
+                  '法定代表人': corpData.legalRepresentative,
+                  '成立时间': corpData.createTime,
+                  '国家地区': corpData.countryDistrict
+                },
+                '行业信息': {
+                  '注册类型': dictData['RegisterTypeCd'][corpData.registerType],
+                  '行业大类': dictData['WorkCorpTypeCd'][corpData.workcorpType],
+                  // '行业中类': dictData['WorkcorpMiddleType'][corpData.workcorpMiddleType],
+                  // '行业小类': dictData['WorkcorpSubdType'][corpData.workcorpSubdType],
+                  '是否有进出口权': corpData.exImrightsflag,
+                  '是否上市公司': corpData.quotedcompanyFlag,
+                  '是否集团客户': corpData.groupcorpFlag,
+                  '是否签定银企合作协议': corpData.bankEnterpriseCoopAgreement,
+                  '是否高新企业': corpData.advancedCorp,
+                  '农业产业化标志': corpData.agricultureFlag
+                },
+                '影像信息': {
+                  'info': '影像资料'
+                }
               }
+
+              this.comInfos = customerCrop;
+              this.companyModal = true;
             }
 
-          }, (err) => {
+          }), (err) => {
 						this.$Message.error('连接服务器出错！');
 						console.error(err);
 					})
@@ -562,31 +574,8 @@
       },
       formatDate(timestramp){  
         return new Date(timestramp).Format('yyyy-MM-dd');  
-      },  
-      initFormatter(){  
-        Date.prototype.Format = function(fmt) { //  
-          let o = {    
-            "M+" : this.getMonth()+1,                 //月份    
-            "d+" : this.getDate(),                    //日    
-            "h+" : this.getHours(),                   //小时    
-            "m+" : this.getMinutes(),                 //分    
-            "s+" : this.getSeconds(),                 //秒    
-            "q+" : Math.floor((this.getMonth()+3)/3), //季度    
-            "S"  : this.getMilliseconds()             //毫秒    
-          };    
-          if(/(y+)/.test(fmt))    
-            fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));    
-          for(var k in o)    
-            if(new RegExp("("+ k +")").test(fmt))    
-                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));    
-          return fmt;    
-        }  
-      }  
+      }
     },
-    created(){  
-      // 为Date 对象添加Format方法
-      this.initFormatter();  
-    },  
     mounted () {
       this.init();
     }

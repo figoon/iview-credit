@@ -177,62 +177,62 @@ export const user_columns = [
 
 export const loan_columns = [
   {
-    key: 'area',
+    key: 'customerProvinceZone',
     title: '地理区域',
     width: 110
   },
   {
-    key: 'channel_type',
+    key: 'salesChannel',
     title: '渠道类型',
     width: 100
   },
   {
-    key: 'channel_pro',
+    key: 'productName',
     title: '贷款产品',
     width: 100
   },
   {
-    key: 'date',
+    key: 'lastLoanDate',
     title: '日期',
     width: 100
   },
   {
-    key: 'avg_limit',
+    key: 'creditAmoutAvg',
     title: '平均额度',
     width: 100
   },
   {
-    key: 'apply_num',
+    key: 'applyingLoanRecord',
     title: '申请笔数',
     width: 90
   },
   {
-    key: 'access_num',
+    key: 'approvaLoanRecord',
     title: '审批笔数',
     width: 90
   },
   {
-    key: 'deny_num',
+    key: 'rejectLoanRecord',
     title: '拒绝笔数',
     width: 90
   },
   {
-    key: 'repay_num',
+    key: 'monthShouldRepayAmout',
     title: '本月还款笔数',
     width: 120
   },
   {
-    key: 'promise_money',
+    key: 'monthShouldBackAmout',
     title: '本月还款金额',
     width: 120
   },
   {
-    key: 'overdue_num',
+    key: 'monthOverRepayRecord',
     title: '本月逾期笔数',
     width: 120
   },
   {
-    key: 'overdue_money',
+    key: 'monthOverRepayAmout',
     title: '本月逾期金额',
     width: 130
   }

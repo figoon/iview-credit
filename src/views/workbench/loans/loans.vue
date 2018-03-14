@@ -54,26 +54,7 @@
 
 <script>
   import * as columns from '../../tables/columns/workbench_columns';  
-  import Mock from 'mockjs'; // 模拟数据
   import util from '@/libs/util.js';
-
-  Mock.mock('Loan/loans', {
-    count: 111,
-    'rows|10': [{
-      'area': '@province',
-      'channel_type': '@cword(4)',
-      'channel_pro': '@cword(8)',
-      'date': '@date',
-      'avg_limit|10000-4000000': 100000,
-      'apply_num|100-4000': 10000, 
-      'access_num|100-4000': 10000,
-      'deny_num|100-4000': 10000,
-      'repay_num|100-4000': 10000, 
-      'promise_money|100-4000': 10000,
-      'overdue_num|100-4000': 10000,
-      'overdue_money|100-4000': 10000
-    }]
-  })
 
   export default {
     data () {
@@ -102,7 +83,7 @@
       // 初始化
       init () {
         // 获取用户列表
-        this.getloanList();
+        this.getloanList(1,10);
       },
       // 增加定时刷新时间
       add () {
@@ -193,16 +174,16 @@
       handleSizeChange (size) {
         this.getloanList();
       },
-      // 获取用户列表
+      // 获取贷款数据列表
       getloanList (size, num, id) {
         //调用后台接口
-        this.$http.get('Loan/loans') //'/api/actdetails/'+ size +'/'+ num +'/'+ id)
+        this.$http.get('poc/loan/comprehensiveQuery?pageNo='+num+'&pageSize='+size) //'/api/actdetails/'+ size +'/'+ num +'/'+ id)
 					.then((res) => {
             // 按状态处理返回结果
 						if(res.status == 200){
-              let loans = res.data.rows,
+              let loans = res.data.data.list,
                   loan_list = [];
-              this.totalNum = res.data.count;
+              this.totalNum = res.data.data.total;
 
               // 遍历用户列表
               loans.forEach(function(loan) {
@@ -221,7 +202,7 @@
               
 							this.loanList = loan_list;
 						} else{
-							this.$Message.error('获取用户信息失败！')
+							this.$Message.error('获取贷款数据列表失败！')
 						}
 					}, (err) => {
 						this.fullscreenLoading = false;

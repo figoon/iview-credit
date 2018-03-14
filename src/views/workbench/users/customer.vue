@@ -22,7 +22,7 @@
                     </FormItem>
                   </Col>
                   <Col span="6">
-                    <FormItem label="日期范围" :label-width="75">
+                    <FormItem label="受理时间" :label-width="75">
                       <DatePicker type="date" placement="bottom-end" placeholder="选择日期" v-model="formSearch[index].dateRange" @on-change="handleDate"></DatePicker>              
                     </FormItem>
                   </Col>
@@ -257,7 +257,7 @@
             render: (h, params) => {
               const row = params.row;
               const type = row.draft_type === '1' ? 'primary' :  'success';
-              const text = row.draft_type === '1' ? '客户信息' : '贷款信息';
+              const text = row.draft_type === '1' ? '客户具体信息' : '贷款具体信息';
               const icon = row.draft_type === '1' ? 'person-stalker' : 'card';
               // 渲染自定义格式
               return h('div', [
@@ -287,21 +287,32 @@
         }
         return columns.draft_columns;
       },
-      // 获取草稿列表
-      getCustomerList (size, num) {
+      // 获取客户信息
+      getCustomerList (size, num, search) {
+
+        let postData = {
+          data: {},
+          pageNum: num,
+          pageSize: size
+        };
+
+        if(search) {
+          postData.data = search;
+        }
+
         // 调用后台接口
-        this.$http.get('api/credit/draft/1/'+ size +'/'+ num)
+        this.$http.post('/poc/draftInfo/list', postData)
 					.then((res) => {
             // 按状态处理返回结果
 						if(res.status == 200){
-              let users = res.data.rows,
+              let users = res.data.data.list,
                   user_list = [];
-              this.totalNum = res.data.count;
+              this.totalNum = res.data.data.total;
               user_list = this.dealCustomer(users, user_list);
 
 							this.customerList = user_list;
 						} else{
-							this.$Message.error('获取草稿信息失败！')
+							this.$Message.error('获取用户列表失败！')
 						}
 					}, (err) => {
 						this.fullscreenLoading = false;

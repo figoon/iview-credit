@@ -22,7 +22,7 @@
                     </FormItem>
                   </Col>
                   <Col span="6">
-                    <FormItem label="日期范围" :label-width="75">
+                    <FormItem label="受理时间" :label-width="75">
                       <DatePicker type="date" placement="bottom-end" placeholder="选择日期" v-model="formSearch[index].dateRange" @on-change="handleDate"></DatePicker>              
                     </FormItem>
                   </Col>
