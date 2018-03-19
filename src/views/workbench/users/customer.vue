@@ -3,7 +3,7 @@
     <Row>
       <Col>
         <Card>
-          <Tabs :value="active_tab" @on-click="handleTabs">
+          <Tabs :value="active_tab" :animated="false" @on-click="handleTabs">
             <TabPane v-for="(item, index) in items" :key="index" 
               :label="item.label" 
               :name="item.name">
@@ -134,6 +134,10 @@
       return {
         totalNum: 100,
         size: 10,
+        num: 1,
+        type: 'total',
+        active_num: 0,
+        searchObj: {},
         formSearch: [{
           cardType: [
             {
@@ -147,8 +151,7 @@
           ],
           selectType: '',
           dateRange: '',
-          beginDate: '20100101',
-          endDate: '20181010',
+          positionTime: '',
           code: '',
           name: ''
         },{
@@ -164,8 +167,7 @@
           ],
           selectType: '',
           dateRange: '',
-          beginDate: '20100101',
-          endDate: '20181010',
+          positionTime: '',
           code: '',
           name: ''
         },{
@@ -181,8 +183,7 @@
           ],
           selectType: '',
           dateRange: '',
-          beginDate: '20100101',
-          endDate: '20181010',
+          positionTime: '',
           code: '',
           name: ''
         },{
@@ -198,8 +199,7 @@
           ],
           selectType: '',
           dateRange: '',
-          beginDate: '20100101',
-          endDate: '20181010',
+          positionTime: '',
           code: '',
           name: ''
         }],
@@ -245,7 +245,7 @@
       // 初始化
       init () {
         // 获取用户列表
-        this.getCustomerList(10, 1);
+        this.getCustomerList(this.type, 10, 1);
       },
       // 动态插入表格列
       getColumns () {
@@ -288,21 +288,30 @@
         return columns.draft_columns;
       },
       // 获取客户信息
-      getCustomerList (size, num, search) {
+      getCustomerList (type, size, num, search) {
+        this.$Loading.start();
 
-        let postData = {
-          data: {},
-          pageNum: num,
-          pageSize: size
-        };
-
-        if(search) {
-          postData.data = search;
+        if(!search) {
+          search = {
+            cusName: null,
+            certificateType: null,
+            certificateCode: null,
+            positionTime: null
+          };
         }
 
+        console.dir(search)
         // 调用后台接口
-        this.$http.post('/poc/draftInfo/list', postData)
-					.then((res) => {
+        this.$http.get("/poc/draftInfo/getList", {params: {
+          requestData: type,
+          pageNumParam: num,
+          pageSizeParam: size,
+          cusName: search['cusName'],
+          certificateType: search['certificateType'],
+          certificateCode: search['certificateCode'],
+          positionTime: search['certificateType']}
+        })  
+          .then((res) => {
             // 按状态处理返回结果
 						if(res.status == 200){
               let users = res.data.data.list,
@@ -310,14 +319,17 @@
               this.totalNum = res.data.data.total;
               user_list = this.dealCustomer(users, user_list);
 
-							this.customerList = user_list;
+              this.customerList = user_list;
+              this.$Loading.finish();
 						} else{
+              this.$Loading.error();
 							this.$Message.error('获取用户列表失败！')
 						}
 					}, (err) => {
-						this.fullscreenLoading = false;
+            this.$Loading.error();
 						this.$Message.error('连接服务器出错！');
 					})
+        
       },
       // 格式化草稿数据
       dealCustomer (users, arr) {
@@ -340,30 +352,35 @@
       },
       // 页码切换回调
       handleCurrentChange (num) {
-        this.getCustomerList(this.size, num);
+        this.num = num;
+        this.getCustomerList(this.type, this.size, num, this.searchObj);
       },
       // 切换每页条数触发
       handleSizeChange (size) {
         this.size = size;
-        this.getCustomerList(size,1);
+        this.getCustomerList(this.type, size, 1, this.searchObj);
       },
       // 选择日期范围
       handleDate (date) {
-        this.formSearch.endDate = date;
+        this.formSearch[this.active_num].positionTime = date;
       },
       // Tabs点击事件
       handleTabs (name) {
         switch (name) {
           case 'reg':
+            this.active_num = 0;
             this.onSearch(0);
             break;
           case 'add':
+            this.active_num = 1;
             this.onSearch(1);
             break;
           case 'access':
+            this.active_num = 2;
             this.onSearch(2);
             break;
           case 'deny':
+            this.active_num = 3;
             this.onSearch(3);
             break;
         }
@@ -401,31 +418,33 @@
       },
       // 搜索事件
       onSearch (index) {
-        this.$http.get('/api/credit/draft/search/1/' + 
-          (this.formSearch[index].selectType || '*')  + '/' + 
-          (this.formSearch[index].code || '*') + '/' + 
-          (this.formSearch[index].beginDate || '*') + '/' + 
-          (this.formSearch[index].endDate || '*') + '/' + 
-          (this.formSearch[index].name || '*'))
-					.then((res) => {
-						if(res.status == 200){
-              let total_num = res.data.length,
-                  users = res.data,
-                  user_list = [];
+        let search = {
+          cusName: this.formSearch[index].name,
+          certificateType: this.formSearch[index].selectType,
+          positionTime: this.formSearch[index].positionTime,
+          certificateCode: this.formSearch[index].code
+        }
 
-              user_list = this.dealCustomer(users, user_list);
+        this.searchObj = search;
 
-              this.totalNum = total_num;
-              this.customerList = user_list;
-              
-							// this.tags=[{name: '共搜索到 '+total_num+' 个结果', type: 'primary'}]
-						} else{
-							this.$Message.error('获取客户信息失败！')
-						}
-					}, (err) => {
-						this.$Message.error('连接服务器出错！');
-						console.error(err);
-					})
+        switch (index) {
+          case 0:
+            this.type = 'total';
+            this.getCustomerList('total',this.size,this.num,search);
+            break;
+          case 1:
+            this.type = 'todayCount';
+            this.getCustomerList('todayCount',this.size,this.num,search);
+            break;
+          case 2:
+            this.type = 'access';
+            this.getCustomerList('access',this.size,this.num,search);
+            break;
+          case 3:
+            this.type = 'refulse';
+            this.getCustomerList('refulse',this.size,this.num,search);
+            break;
+        }
       }
     },
     mounted () {

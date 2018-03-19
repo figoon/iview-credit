@@ -286,12 +286,12 @@
         }
       },
       // 获取客户信息数据
-      getUserInfo () {
-        return this.$http.get('/poc/getCustomerInfoByCusNo?cusNo=A01H17122801223');
+      getUserInfo (code) {
+        return this.$http.get('/poc/getCustomerInfoByCusNo?cusNo='+ code); //A01H17122801223
       },
       // 客户类型信息
-      dealUserInfo () {
-        this.$http.all([this.getUserInfo(), this.returnDict()])
+      dealUserInfo (code) {
+        this.$http.all([this.getUserInfo(code), this.returnDict()])
           .then(this.$http.spread((user, dict) => {
             if(user.data.errcode === "0") {
               let userData = user.data.data,
@@ -359,12 +359,12 @@
 
       },
       // 获取经营客户信息
-      getCustomerInfo () {
-        return this.$http.get('/poc/customerCrop/getCustomerCropByNo?corpCusNo=A01H17122801223');
+      getCustomerInfo (code) {
+        return this.$http.get('/poc/customerCrop/getCustomerCropByNo?corpCusNo='+ code); //A01H17122801223
       },
       // 经营客户信息处理
       getCustomerCrop () {
-        this.$http.all([this.getCustomerInfo(), this.returnDict()])
+        this.$http.all([this.getCustomerInfo(this.modelInfo.customer_code), this.returnDict()])
           .then(this.$http.spread((crop, dict) => {
             if(crop.data.errcode === "0") {
               let corpData = crop.data.data,
@@ -442,7 +442,7 @@
               
               let creditInfos = {
                 '贷款信息': {
-                  '产品种类': dictData['AppParentCd'][creditData.tbLnLoan.productName],
+                  '产品种类': dictData['ProductNameCd'][creditData.tbLnLoan.productName] || '传值有误',
                   '额度类别': creditData.tbLnLoan.lineType,//dictData['LineTypeCd'][creditData.tbLnLoan.lineType],
                   '授信额度': creditData.tbLnLoan.lineAmount,
                   '可用额度': creditData.tbLnLoan.lineBalance,
@@ -526,8 +526,8 @@
       },
       // 选择日期范围
       handleDate (date) {
-        this.formSearch.startTime = date+' 00:00:00';
-        this.formSearch.endTime = date+' 23:59:59';
+        this.formSearch.startTime = date; //+' 00:00:00';
+        this.formSearch.endTime = date; //+' 23:59:59';
       },
       // 显示客户相关信息
       onShow (info) {
@@ -536,7 +536,7 @@
         this.modelInfo.customer_code = info.row.cusNo;
 
         if(info.row.draftType == '1') {
-          this.dealUserInfo();
+          this.dealUserInfo(info.row.cusNo);
         } else {
           this.dealCreditInfos(info.row.lineNum);
         }

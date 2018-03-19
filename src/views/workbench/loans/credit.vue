@@ -308,10 +308,24 @@
         }
         return columns.draft_columns;
       },
-      // 获取草稿列表
-      getCreditList (size, num) {
+      // 获取信贷列表
+      getCreditList (size, num, search) {
+
+        let postData = {
+          "data": {
+            "certificateCode": "证件信息",
+            "certificateType": "证件类型",
+            "cusName": "客户名称",
+            "createDate": "日期范围"
+          }
+        };
+
+        if(search) {
+          postData.data = search;
+        }
+
         // 调用后台接口
-        this.$http.get('api/credit/draft/2/'+ size +'/'+ num)
+        this.$http.post('/poc/loan/getLoanInfosSelective/1')
 					.then((res) => {
             // 按状态处理返回结果
 						if(res.status == 200){
