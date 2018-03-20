@@ -3,22 +3,17 @@
     <Row>
       <Col>
         <Card>
-          <Tabs :value="active_tab" @on-click="handleTabs">
+          <Tabs :value="active_tab" :animated="false" @on-click="handleTabs">
             <TabPane v-for="(item, index) in items" :key="index" 
               :label="item.label" 
               :name="item.name">
               <Form ref="formSearch" :model="formSearch[index]" >
                 <Row :gutter="10">
                   <Col span="5">
-                    <FormItem label="证件类型" :label-width="75">
+                    <FormItem label="贷款产品" :label-width="75">
                       <Select v-model="formSearch[index].selectType">
                         <Option v-for="item in formSearch[index].cardType" :value="item.value" :key="item.value">{{ item.label }}</Option>
                       </Select>
-                    </FormItem>
-                  </Col>
-                  <Col span="5" v-if="formSearch[index].selectType">
-                    <FormItem :label-width="0">
-                      <Input v-model="formSearch[index].code" placeholder="请输入证件信息"></Input>
                     </FormItem>
                   </Col>
                   <Col span="6">
@@ -134,6 +129,10 @@
       return {
         totalNum: 100,
         size: 10,
+        num: 1,
+        type: '1',
+        active_num: 0,
+        searchObj: {},
         formSearch: [{
           cardType: [
             {
@@ -147,9 +146,7 @@
           ],
           selectType: '',
           dateRange: '',
-          beginDate: '20100101',
-          endDate: '20181010',
-          code: '',
+          disposeDate: '',
           name: ''
         },{
           cardType: [
@@ -164,9 +161,7 @@
           ],
           selectType: '',
           dateRange: '',
-          beginDate: '20100101',
-          endDate: '20181010',
-          code: '',
+          disposeDate: '',
           name: ''
         },{
           cardType: [
@@ -181,43 +176,7 @@
           ],
           selectType: '',
           dateRange: '',
-          beginDate: '20100101',
-          endDate: '20181010',
-          code: '',
-          name: ''
-        },{
-          cardType: [
-            {
-              value: '10',
-              label: '身份证'
-            },
-            {
-              value: '11',
-              label: '组织机构代码'
-            }
-          ],
-          selectType: '',
-          dateRange: '',
-          beginDate: '20100101',
-          endDate: '20181010',
-          code: '',
-          name: ''
-        },{
-          cardType: [
-            {
-              value: '10',
-              label: '身份证'
-            },
-            {
-              value: '11',
-              label: '组织机构代码'
-            }
-          ],
-          selectType: '',
-          dateRange: '',
-          beginDate: '20100101',
-          endDate: '20181010',
-          code: '',
+          disposeDate: '',
           name: ''
         }],
         items: [
@@ -232,14 +191,6 @@
           {
             label: '拒绝笔数',
             name: 'deny'
-          },
-          {
-            label: '本月还款笔数',
-            name: 'repay'
-          },
-          {
-            label: '本月逾期笔数',
-            name: 'overdue'
           }
         ],
         infos: {},
@@ -270,10 +221,10 @@
       },
       // 动态插入表格列
       getColumns () {
-        if(columns.draft_columns.length < 6) {
-          columns.draft_columns.splice(4,0,{
+        if(columns.credit_columns.length < 8) {
+          columns.credit_columns.splice(6,0,{
             key: 'draft_type',
-            title: '草稿类型',
+            title: '贷款信息',
             width: 150,
             render: (h, params) => {
               const row = params.row;
@@ -306,89 +257,91 @@
             }
           });
         }
-        return columns.draft_columns;
+        return columns.credit_columns;
       },
       // 获取信贷列表
       getCreditList (size, num, search) {
+        this.$Loading.start();
 
-        let postData = {
-          "data": {
-            "certificateCode": "证件信息",
-            "certificateType": "证件类型",
-            "cusName": "客户名称",
-            "createDate": "日期范围"
-          }
-        };
-
-        if(search) {
-          postData.data = search;
+        if(!search) {
+          search = {
+            cusNo: null,
+            queryType: "1"
+          };
         }
 
         // 调用后台接口
-        this.$http.post('/poc/loan/getLoanInfosSelective/1')
+        this.$http.post('/poc/loan/getLoanInfosSelective',{
+          "data": search,
+          "pageNum": num,
+          "pageSize": size}
+        )
 					.then((res) => {
             // 按状态处理返回结果
 						if(res.status == 200){
-              let users = res.data.rows,
-                  user_list = [];
-              this.totalNum = res.data.count;
-              user_list = this.dealCustomer(users, user_list);
+              let credits = res.data.data.list,
+                  credit_list = [];
+              this.totalNum = res.data.data.total;
+              credit_list = this.dealCredit(credits, credit_list);
 
-							this.customerList = user_list;
+              this.customerList = credit_list;
+              this.$Loading.finish();
 						} else{
-							this.$Message.error('获取草稿信息失败！')
+              this.$Loading.error();
+							this.$Message.error('获取贷款信息失败！')
 						}
 					}, (err) => {
-						this.fullscreenLoading = false;
+						this.$Loading.error();
 						this.$Message.error('连接服务器出错！');
 					})
       },
-      // 格式化草稿数据
-      dealCustomer (users, arr) {
+      // 格式化贷款数据
+      dealCredit (credits, arr) {
         // 遍历用户列表
-        users.forEach(function(user) {
-          let _user = {};
+        credits.forEach(function(credit) {
+          let _credit = {};
 
-          // 格式化用户数据
-          for(let key of Object.keys(user)) {
+          // 格式化贷款数据
+          for(let key of Object.keys(credit)) {
             if(key !== 'operator') {
-              _user[key] = user[key]; 
+              _credit[key] = credit[key]; 
             }
           };
 
           // 添加到用户列表数组中
-          arr.push(_user);
+          arr.push(_credit);
         }, this);
 
         return arr;
       },
       // 页码切换回调
       handleCurrentChange (num) {
-        this.getCreditList(this.size, num);
+        this.num = num;
+        this.getCreditList(this.size, num, this.searchObj);
       },
       // 切换每页条数触发
       handleSizeChange (size) {
         this.size = size;
-        this.getCreditList(size,1);
+        this.getCreditList(size, 1, this.searchObj);
       },
       // 选择日期范围
       handleDate (date) {
-        this.formSearch.endDate = date;
+        this.formSearch[this.active_num].disposeDate = date;
       },
       // Tabs点击事件
       handleTabs (name) {
         switch (name) {
-          case 'reg':
+          case 'apply':
+            this.active_num = 0;
             this.onSearch(0);
             break;
-          case 'add':
+          case 'access':
+          this.active_num = 1;
             this.onSearch(1);
             break;
-          case 'access':
-            this.onSearch(2);
-            break;
           case 'deny':
-            this.onSearch(3);
+            this.active_num = 2;
+            this.onSearch(2);
             break;
         }
       },
@@ -425,31 +378,27 @@
       },
       // 搜索事件
       onSearch (index) {
-        this.$http.get('/api/credit/draft/search/2/' + 
-          (this.formSearch[index].selectType || '*')  + '/' + 
-          (this.formSearch[index].code || '*') + '/' + 
-          (this.formSearch[index].beginDate || '*') + '/' + 
-          (this.formSearch[index].endDate || '*') + '/' + 
-          (this.formSearch[index].name || '*'))
-					.then((res) => {
-						if(res.status == 200){
-              let total_num = res.data.length,
-                  users = res.data,
-                  user_list = [];
+        let search = {
+          cusNo: this.formSearch[index].name,
+          productId: this.formSearch[index].selectType,
+          disposeDate: this.formSearch[index].disposeDate,
+        }
 
-              user_list = this.dealCustomer(users, user_list);
+        this.searchObj = search;
 
-              this.totalNum = total_num;
-              this.customerList = user_list;
-              
-							// this.tags=[{name: '共搜索到 '+total_num+' 个结果', type: 'primary'}]
-						} else{
-							this.$Message.error('获取客户信息失败！')
-						}
-					}, (err) => {
-						this.$Message.error('连接服务器出错！');
-						console.error(err);
-					})
+        switch (index) {
+          case 0:
+            search.queryType = '1';
+            break;
+          case 1:
+            search.queryType = '2';
+            break;
+          case 2:
+            search.queryType = '3';
+            break;
+        }
+
+        this.getCreditList(this.size,this.num,search);
       }
     },
     mounted () {

@@ -42,8 +42,6 @@
               <Button type="primary" @click="handleCredit('apply')" long style="margin:0 0 10px;">申请笔数</Button>
               <Button type="primary" @click="handleCredit('access')" long style="margin:0 0 10px;">审批笔数</Button>
               <Button type="primary" @click="handleCredit('deny')" long style="margin:0 0 10px;">拒绝笔数</Button>
-              <Button type="primary" @click="handleCredit('repay')" long style="margin:0 0 10px;">本月还款笔数</Button>
-              <Button type="primary" @click="handleCredit('overdue')" long style="margin:0 0 10px;">本月逾期笔数</Button>
             </Row>
           </div>
         </Card>

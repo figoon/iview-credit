@@ -126,7 +126,7 @@ export const draft_columns = [
     width: 180,
     render: (h, params) => {
       const row = params.row;
-      return code_value[row.certificateType] || '未指定证件类型';
+      return code_value[row.certificateType] || '未指定产品类型';
     }
   },
   {
@@ -141,6 +141,48 @@ export const draft_columns = [
       const row = params.row;
       return h('div',   
         new Date(row.disposeTime).Format('yyyy-MM-dd hh:mm:ss'));
+    }
+  }
+];
+
+export const credit_columns = [
+  {
+    key: 'cusNo',
+    title: '客户名称',
+    width: 100
+  },
+  {
+    key: 'lineAmount',
+    title: '授信额度',
+    width: 100
+  },
+  {
+    key: 'lineNum',
+    title: '贷款编号',
+    width: 150
+  },
+  {
+    key: 'productName',
+    title: '贷款产品',
+    width: 200
+  },
+  {
+    key: 'loanAmount',
+    title: '贷款金额',
+    width: 100
+  },
+  {
+    key: 'loanLength',
+    title: '贷款期限',
+    width: 100
+  },
+  {
+    key: 'createDate',
+    title: '受理时间',
+    render: (h, params) => {
+      const row = params.row;
+      return h('div',   
+        new Date(row.createDate).Format('yyyy-MM-dd hh:mm:ss'));
     }
   }
 ];
@@ -188,13 +230,7 @@ export const loan_columns = [
   },
   {
     key: 'productName',
-    title: '贷款产品',
-    width: 100
-  },
-  {
-    key: 'lastLoanDate',
-    title: '日期',
-    width: 100
+    title: '贷款产品'
   },
   {
     key: 'creditAmoutAvg',
@@ -215,26 +251,6 @@ export const loan_columns = [
     key: 'rejectLoanRecord',
     title: '拒绝笔数',
     width: 90
-  },
-  {
-    key: 'monthShouldRepayAmout',
-    title: '本月还款笔数',
-    width: 120
-  },
-  {
-    key: 'monthShouldBackAmout',
-    title: '本月还款金额',
-    width: 120
-  },
-  {
-    key: 'monthOverRepayRecord',
-    title: '本月逾期笔数',
-    width: 120
-  },
-  {
-    key: 'monthOverRepayAmout',
-    title: '本月逾期金额',
-    width: 130
   }
 ]
 

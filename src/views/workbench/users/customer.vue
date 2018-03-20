@@ -252,7 +252,7 @@
         if(columns.draft_columns.length < 6) {
           columns.draft_columns.splice(4,0,{
             key: 'draft_type',
-            title: '草稿类型',
+            title: '客户类型',
             width: 150,
             render: (h, params) => {
               const row = params.row;
@@ -300,7 +300,6 @@
           };
         }
 
-        console.dir(search)
         // 调用后台接口
         this.$http.get("/poc/draftInfo/getList", {params: {
           requestData: type,
