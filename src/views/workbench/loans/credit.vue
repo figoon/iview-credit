@@ -39,7 +39,7 @@
                 <Col span="20">
                   <Page :total="totalNum" show-sizer show-total
                     :style="{float: 'right',marginBottom: '20px'}"
-                    :page-size="10"
+                    :page-size="size"
                     :page-size-opts="[10,20,50,100]"
                     placement="top"
                     @on-change="handleCurrentChange"
@@ -132,7 +132,10 @@
         num: 1,
         type: '1',
         active_num: 0,
-        searchObj: {},
+        searchObj: {
+          cusNo: null,
+          queryType: "1"
+        },
         formSearch: [{
           cardType: [
             {
@@ -264,10 +267,7 @@
         this.$Loading.start();
 
         if(!search) {
-          search = {
-            cusNo: null,
-            queryType: "1"
-          };
+          search = this.searchObj;
         }
 
         // 调用后台接口
