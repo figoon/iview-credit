@@ -145,6 +145,11 @@
       TreeGrid
     },
     methods: {
+      // 初始化
+      init () {
+        // 获取字典列表
+        this.getOrgList();
+      },
       rowClick(data, event, index,text) {
         switch(text) {
           case '编辑':
@@ -159,6 +164,19 @@
             console.log('点击事件:' + event)
             break;
         }
+      },
+      getOrgList () {
+        this.$http.get('/poc/organization/findByParentIdsLike?orgNum=1')
+          .then((res) => {
+            // 按状态处理返回结果
+						if(res.status == 200){
+              this.$Message.success(res.data.errmsg);
+              this.getdictList(10,1);
+            }
+          }, (err) => {
+            this.$Loading.error();
+						this.$Message.error('连接服务器出错！');
+					})
       },
       onEdit (data, event, index) {
         this.modalEdit = true;
@@ -219,6 +237,9 @@
       cancel () {
         this.$Message.info('Clicked cancel');
       }
+    },
+    mounted () {
+      this.init();
     }
   }
 </script>
