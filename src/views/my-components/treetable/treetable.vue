@@ -125,7 +125,15 @@ export default {
         this.checks = false
       }
     }
-    // this.toggle(0,this.initItems[0])
+
+    // 默认展现root根结构
+    this.$on('showtree', () => {
+      setTimeout(()=>{
+        this.toggle(0,this.initItems[0])
+      },300);
+    });
+   
+
     // 绑定onresize事件 监听屏幕变化设置宽
     this.$nextTick(() => {
       this.screenWidth = document.body.clientWidth
@@ -219,7 +227,6 @@ export default {
       for (var i = 1; i < level; i++) {
         spaceHtml += "<i class='ms-tree-space'></i>"
       }
-   
       items.forEach((item, index) => {
         item = Object.assign({}, item, {
           "parent": parent,
@@ -244,8 +251,6 @@ export default {
           this.initData(item.children, level + 1, item);
         }
       })
-      console.dir(this.initItems)
-
     },
     //  隐藏显示
     show(item) {
