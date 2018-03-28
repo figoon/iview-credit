@@ -151,7 +151,7 @@
                   },
                   on: {
                     click: () => {
-                      this.remove(params)
+                      this.onRemove(params.row.codeId)
                     }
                   }
                 }, [
@@ -258,7 +258,6 @@
               this.getdictList(10,1);
             }
           }, (err) => {
-            this.$Loading.error();
 						this.$Message.error('连接服务器出错！');
 					})
       },
@@ -288,11 +287,31 @@
           .then((res) => {
             // 按状态处理返回结果
 						if(res.status == 200){
-              this.$Message.success(res.data.errmsg);
-              this.getdictList(10,1);
+              if(res.data.errcode == "0") {
+                this.$Message.success(res.data.errmsg);
+                this.getdictList(10,1);
+              }
             }
           }, (err) => {
-            this.$Loading.error();
+						this.$Message.error('连接服务器出错！');
+					})
+      },
+      // 删除字典
+      onRemove (id) {
+        this.$http.post('/poc/tpCmnCodes/delete', {
+          data: {
+            codeId: id
+          }
+        })
+          .then((res) => {
+            // 按状态处理返回结果
+						if(res.status == 200){
+              if(res.data.errcode == "0") {
+                this.$Message.success(res.data.errmsg);
+                this.getdictList(10,1);
+              }
+            }
+          }, (err) => {
 						this.$Message.error('连接服务器出错！');
 					})
       },
@@ -303,10 +322,6 @@
         } else {
           this.onEditConfirm();
         }
-      },
-      // 删除字典
-      onRemove (index) {
-        this.splice(index, 1);
       },
       // 取消操作
       onCancel () {
