@@ -22,21 +22,26 @@
                 <Icon type="ios-search"></Icon>
                 查询条件
               </p>
-              <Form ref="formSearch" :model="formSearch" :label-width="75" >
+              <Form ref="formSearch" :model="formSearch">
                 <Row :gutter="10">
                   <Col span="10">
-                    <FormItem label="归属机构">
-                      <org-selector ref="orgSelec" v-model="formSearch.orgValue" @on-change="onSearch" level="1"/>
+                    <FormItem label="归属机构" :label-width="75" >
+                      <org-selector ref="orgSelec" v-model="formSearch.orgValue" level="1"/>
                     </FormItem>
                   </Col>
-                  <Col span="7">
-                    <FormItem label="登录名">
-                      <Input v-model="formSearch.loginName" @on-change="onSearch"></Input>
+                  <Col span="6">
+                    <FormItem label="登录名" :label-width="60" >
+                      <Input v-model="formSearch.loginName"></Input>
                     </FormItem>
                   </Col>
-                  <Col span="7">
-                    <FormItem label="姓名">
-                      <Input v-model="formSearch.name" @on-change="onSearch"></Input>
+                  <Col span="6">
+                    <FormItem label="姓名" :label-width="60" >
+                      <Input v-model="formSearch.name"></Input>
+                    </FormItem>
+                  </Col>
+                  <Col span="2">
+                    <FormItem> 
+                      <Button type="primary" @click="onSearch">搜索</Button>
                     </FormItem>
                   </Col>
                 </Row>
@@ -55,8 +60,8 @@
                 <Button type="primary" size="small" icon="person-add" @click="modalAdd = true">添加用户</Button>
                 <Modal
                   v-model="modalAdd"
-                  title="添加用户信息"
-                  @on-ok="onCreate"
+                  :title="editFlag ? '编辑用户信息' : '添加用户信息'"
+                  @on-ok="handleInfo"
                   @on-cancel="onCancel"
                   :styles="{top: '30px'}">
                   <Form ref="formUser" :model="formUser" :rules="rules" :label-width="75">
@@ -129,20 +134,6 @@
   import * as columns from '../../tables/columns/users_columns';  
   import Tree from '../../my-components/tree/tree.vue';
   import orgSelector from '../../my-components/cascade/components/al-selector.vue';
-  import Mock from 'mockjs'; // 模拟数据
-
-  Mock.mock('User/users', {
-    count: 111,
-    'rows|10': [{
-      'user_num|+1': 100001,
-      'user_name': '@cword(3)',
-      'org_name': '@cword(6)',
-      'org_num|+1': 124964,
-      'postion_name': '@cword(9)',
-      'fixed_time': '@datetime',
-      'user_state|1-2': true  
-    }]
-  })
 
   export default {
     name: 'users_user',
@@ -153,6 +144,7 @@
     },
     data () {
       return {
+        editFlag: true,
         formSearch: {
           orgValue: [],
           loginName: '',
@@ -172,7 +164,7 @@
           [{
               key: 'user_state',
               title: '状态',
-              width: 130,
+              width: 120,
               render: (h, params) => {
                 const row = params.row;
                 const color = row.user_state === true ? 'green' :  'red';
@@ -274,13 +266,13 @@
       // 获取用户列表
       getUserList (size, num, id) {
         //调用后台接口
-        this.$http.get('User/users') //'/api/actdetails/'+ size +'/'+ num +'/'+ id)
+        this.$http.get('/poc/user/getUsersByOrg?orgNum=')
 					.then((res) => {
             // 按状态处理返回结果
 						if(res.status == 200){
-              let users = res.data.rows,
+              let users = res.data.data,
                   user_list = [];
-              this.totalNum = res.data.count;
+              this.totalNum = res.data.data.length;
 
               // 遍历用户列表
               users.forEach(function(user) {
@@ -316,19 +308,13 @@
         console.log(size)
         this.getUserList();
       },
-      // 搜索方法
-      search (data, argumentObj) {
-        let res = data;
-        let dataClone = data;
-        for (let argu in argumentObj) {
-          if (argumentObj[argu].length > 0) {
-            res = dataClone.filter(d => {
-              return d[argu].indexOf(argumentObj[argu]) > -1;
-            });
-            dataClone = res;
-          }
+      // 选择操作方法
+      handleInfo () {
+        if(this.editFlag) {
+          this.onEdit();
+        } else {
+          this.onCreate();
         }
-        return res;
       },
       // 添加用户
       onCreate () {
@@ -356,7 +342,6 @@
       },
       // 搜索事件
       onSearch () {
-        this.userList = this.search(this.userList, {name: this.formSearch.loginName, tel: this.formSearch.name});
       }
     },
     mounted () {
