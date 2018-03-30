@@ -58,7 +58,8 @@ export const user_columns = [
   },
   {
     key: 'positonName',
-    title: '角色名称'
+    title: '角色名称',
+    width: 120
   },
   {
     key: 'fixedTime',
