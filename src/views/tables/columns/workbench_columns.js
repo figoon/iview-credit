@@ -256,26 +256,85 @@ export const loan_columns = [
 
 export const flow_columns = [
   {
-    key: 'cus_name',
+    key: 'cusName',
+    title: '客户名称',
+    width: 150
+  },
+  {
+    key: 'lineNum',
+    title: '贷款编号',
+    width: 220
+  },
+  {
+    key: 'productName',
+    title: '产品类型',
+    width: 300
+  },
+  {
+    key: 'createTime',
+    title: '受理时间',
+    render: (h, params) => {
+      const row = params.row;
+      return h('div',   
+        new Date(row.createTime).Format('yyyy-MM-dd hh:mm:ss'));
+    }
+  }
+]
+
+export const flow_details_columns = [
+  {
+    key: 'cusName',
     title: '客户名称',
     width: 120
   },
   {
-    key: 'cus_no',
+    key: 'lineNum',
     title: '贷款编号',
-    width: 120
+    width: 180
   },
   {
-    key: 'certificate_type',
+    key: 'productName',
     title: '产品类型',
-    width: 180,
+    width: 280
+  },
+  {
+    key: 'orgCd',
+    title: '经办机构',
+    width: 150
+  },
+  {
+    key: 'userCd',
+    title: '经办人员',
+    width: 130
+  },
+  {
+    key: 'nodeName',
+    title: '流程节点名称',
+    width: 180
+  },
+  {
+    key: 'createTime',
+    title: '开始经办时间',
+    width: 150,
     render: (h, params) => {
       const row = params.row;
-      return row.certificate_type === '10' ? '个人经营性车辆按揭贷款' :  '非额度项下个商信用贷贷款';
+      return h('div',   
+        new Date(row.createTime).Format('yyyy-MM-dd hh:mm:ss'));
     }
   },
   {
-    key: 'dispose_time',
-    title: '受理时间'
+    key: 'finishTime',
+    title: '结束经办时间',
+    width: 150,
+    render: (h, params) => {
+      const row = params.row;
+      return h('div',   
+        new Date(row.finishTime).Format('yyyy-MM-dd hh:mm:ss'));
+    }
+  },
+  {
+    key: 'nodeStatus',
+    title: '审批状态',
+    width: 120
   }
 ]

@@ -9,21 +9,21 @@
           </p>
           <Form ref="formSearch" :model="formSearch" >
             <Row :gutter="10">
-              <Col span="7">
+              <Col span="5">
                 <FormItem label="贷款产品" :label-width="75">
-                  <Select v-model="formSearch.selectType">
+                  <Select clearable v-model="formSearch.selectType">
                     <Option v-for="item in formSearch.cardType" :value="item.value" :key="item.value">{{ item.label }}</Option>
                   </Select>
                 </FormItem>
               </Col>
               <Col span="6">
-                <FormItem label="日期范围" :label-width="75">
+                <FormItem label="受理时间" :label-width="75">
                   <DatePicker type="date" placement="bottom-end" placeholder="选择日期" v-model="formSearch.date" @on-change="handleDate"></DatePicker>              
                 </FormItem>
               </Col>
               <Col span="6">
                 <FormItem label="客户名称" :label-width="75"> 
-                  <Input v-model="formSearch.name"></Input>
+                  <Input v-model="formSearch.cusName"></Input>
                 </FormItem>
               </Col>
               <Col span="2">
@@ -57,11 +57,11 @@
             </Col>
           </Row>
           <!-- 模态层 -->
-          <Modal v-model="showInfo" width="750" :styles="{top: '30px'}">
-            <div slot="header" style="color:#f60;text-align:left;font-size:16px;font-weight: bold;padding: 7px 0;">
-              流程具体信息
-            </div>
-            <Table :columns="flowColumns" :data="flowList" size="small" stripe :style="{marginBottom: '10px'}"></Table>
+          <Modal v-model="showInfo" width="1000" :styles="{top: '30px'}">
+            <p slot="header" style="margin:5px;color:#f60;text-align:center">
+              <span>流程号：{{modelInfo.instance_num}}具体信息</span>
+            </p>
+            <Table :columns="flowDetailsColumns" :data="flowDetailsList" size="small" stripe :style="{marginBottom: '10px'}"></Table>
             <div slot="footer">
               <Button type="error" size="large" long :loading="modal_loading" @click="onConfirm">确定</Button>
             </div>
@@ -74,7 +74,6 @@
 
 <script>
   import * as columns from '../../tables/columns/workbench_columns'; 
-  import * as infos from '../../data/workbench_draft';  
 
   export default {
     name: 'workbench_draft',
@@ -83,33 +82,22 @@
         totalNum: 100,
         size: 10,
         formSearch: {
-          cardType: [
-            {
-              value: '10',
-              label: '房地产抵押非额度项下个人商务贷款'
-            },
-            {
-              value: '11',
-              label: '非额度项下个商信用贷贷款'
-            },
-            {
-              value: '12',
-              label: '个人经营性车辆按揭贷款'
-            }
-          ],
+          cardType: columns.card_type,
           selectType: '',
-          date: '',
-          beginDate: '20100101',
-          endDate: '20181010',
-          code: '',
-          name: ''
+          cusName: '',
+          beginDate: '',
+          endDate: ''
         },
-        infos: {},
+        modelInfo: {
+          instance_num: ''
+        },
         infoType: '',
         showInfo: false,
         modal_loading: false,
         flowList: [],
-        flowColumns: this.getColumns()
+        flowColumns: this.getColumns(),
+        flowDetailsList: [],
+        flowDetailsColumns: columns.flow_details_columns
       }
     },
     methods: {
@@ -117,18 +105,20 @@
       init () {
         // 获取用户列表
         this.getFlowList(10, 1);
+        this.getFlowDict();
       },
       // 动态插入表格列
       getColumns () {
         if(columns.flow_columns.length < 5) {
           columns.flow_columns.splice(3,0,{
-            key: 'draft_type',
+            key: 'draftType',
             title: '流程具体信息',
+            width: 200,
             render: (h, params) => {
               const row = params.row;
-              const type = row.draft_type === '1' ? 'primary' :  'primary';
-              const text = row.draft_type === '1' ? '流程具体信息' : '流程具体信息';
-              const icon = row.draft_type === '1' ? 'ios-briefcase' : 'ios-briefcase';
+              const type = 'primary';
+              const text = '流程具体信息';
+              const icon = 'ios-list';
               // 渲染自定义格式
               return h('div', [
                 h('Button', {
@@ -157,46 +147,105 @@
         }
         return columns.flow_columns;
       },
-      // 获取草稿列表
-      getFlowList (size, num) {
+      // 获取流程列表
+      getFlowList (size, num, search) {
+
+        let postData = {
+          data: {},
+          pageNum: num,
+          pageSize: size
+        };
+
+        if(search) {
+          postData.data = search;
+        }
+
         // 调用后台接口
-        this.$http.get('api/credit/draft/*/'+ size +'/'+ num)
+        this.$http.post('/poc/messageInfo/getLoanProcessList', postData)
 					.then((res) => {
             // 按状态处理返回结果
-						if(res.status == 200){
-              let users = res.data.rows,
-                  user_list = [];
-              this.totalNum = res.data.count;
-              user_list = this.dealDraft(users, user_list);
+            if(res.status == 200) {
+              if(res.data.errcode === "0"){
+                let flows = res.data.data.list,
+                    flow_list = [];
+                this.totalNum = res.data.data.total;
+                flow_list = this.dealFlow(flows, flow_list);
 
-							this.flowList = user_list;
-						} else{
-							this.$Message.error('获取草稿信息失败！')
-						}
+                this.flowList = flow_list;
+              } else{
+                this.$Message.error('获取流程数据列表出错！')
+              }
+            }
 					}, (err) => {
 						this.fullscreenLoading = false;
 						this.$Message.error('连接服务器出错！');
 					})
       },
-      // 格式化草稿数据
-      dealDraft (users, arr) {
+      // 格式化流程数据
+      dealFlow (flows, arr) {
         // 遍历用户列表
-        users.forEach(function(user) {
-          let _user = {};
+        flows.forEach(function(flow) {
+          let _flow = {};
 
           // 格式化用户数据
-          for(let key of Object.keys(user)) {
+          for(let key of Object.keys(flow)) {
             if(key !== 'operator') {
-              _user[key] = user[key]; 
+              _flow[key] = flow[key]; 
             }
           };
 
           // 添加到用户列表数组中
-          arr.push(_user);
+          arr.push(_flow);
         }, this);
 
         return arr;
       },
+      // 获取码值字典
+      getFlowDict () {
+        // return this.$http.post('/poc/dictionary/getAllDictInfosMap');
+        this.$http.get('/poc/dictionary/getAllDictInfosMap')
+          .then((res) => {
+            let dictData = res.data.data;
+            sessionStorage.setItem("flowDict", JSON.stringify(dictData));
+          }, (err) => {
+						this.$Message.error('获取字典数据发生错误！');
+						console.error(err);
+					})
+      },
+      // 返回码值字典
+      returnDict (name) {
+        let dictData = sessionStorage.getItem("flowDict");
+        if(dictData === null){
+          return false
+        } else {
+          return JSON.parse(dictData);
+        }
+      },
+      // 流程具体信息
+      dealFlowInfo (code) {
+        this.$http.post('/poc/messageInfo/getLoanProcessData',{
+          data: {
+            instanceNum: 'SUP0117122800070'//code
+          },
+          pageNum: 1,
+          pageSize: 50
+        })
+          .then((res) => {
+            if(res.data.errcode === "0") {
+              let flows = res.data.data.list,
+                  flow_list = [];
+              this.totalNum = res.data.data.total;
+              flow_list = this.dealFlow(flows, flow_list);
+
+              this.flowDetailsList = flow_list;
+            }
+          }, (err) => {
+						this.fullscreenLoading = false;
+						this.$Message.error('连接服务器出错！');
+        	})
+
+      },
+
       // 页码切换回调
       handleCurrentChange (num) {
         this.getFlowList(this.size, num);
@@ -208,18 +257,13 @@
       },
       // 选择日期范围
       handleDate (date) {
-        this.formSearch.endDate = date;
+        this.formSearch.beginDate = date; //+' 00:00:00';
+        this.formSearch.endDate = date; //+' 23:59:59';
       },
-      // 显示客户相关信息
+      // 显示流程相关信息
       onShow (info) {
-        console.dir(info)
-        this.infoType = info.row.draft_type;
-
-        if(info.row.draft_type == '1') {
-          this.infos = infos.userInfos;
-        } else {
-          this.infos = infos.creditInfos;
-        }
+        this.modelInfo.instance_num = info.row.instanceNum;
+        this.dealFlowInfo(info.row.instanceNum);
         this.showInfo = true;
       },
       // 模态窗口确认
@@ -231,41 +275,19 @@
           this.$Message.success('成功关闭信息窗口！');
         }, 500);
       },
-      // 二级模态窗口确认
-      onSeConfirm () {
-        this.modal_loading = true;
-        setTimeout(() => {
-          this.modal_loading = false;
-          this.$Message.success('成功关闭组织机构窗口！');
-        }, 500);
-      },
       // 搜索事件
       onSearch () {
-        this.$http.get('/api/credit/draft/search/*/' + 
-          (this.formSearch.selectType || '*')  + '/' + 
-          (this.formSearch.code || '*') + '/' + 
-          (this.formSearch.beginDate || '*') + '/' + 
-          (this.formSearch.endDate || '*') + '/' + 
-          (this.formSearch.name || '*'))
-					.then((res) => {
-						if(res.status == 200){
-              let total_num = res.data.length,
-                  users = res.data,
-                  user_list = [];
+        let search_obj = {
+          productName: this.formSearch.selectType || null,
+          cusName: this.formSearch.cusName || "",
+          beginDate: this.formSearch.beginDate || "",
+          endDate: this.formSearch.endDate || ""
+        };
 
-              user_list = this.dealDraft(users, user_list);
-
-              this.totalNum = total_num;
-              this.flowList = user_list;
-              
-							// this.tags=[{name: '共搜索到 '+total_num+' 个结果', type: 'primary'}]
-						} else{
-							this.$Message.error('获取草稿信息失败！')
-						}
-					}, (err) => {
-						this.$Message.error('连接服务器出错！');
-						console.error(err);
-					})
+        this.getFlowList(10,1,search_obj);
+      },
+      formatDate(timestramp){  
+        return new Date(timestramp).Format('yyyy-MM-dd');  
       }
     },
     mounted () {
