@@ -160,7 +160,7 @@ export const appRouter = [
 				path: 'deploy', 
 				title: '部署流程', 
 				name: 'flow_deploy', 
-				component: resolve => { require(['@/views/flow/deploy/deploy.vue'], resolve); } 
+				component: resolve => { require(['@/views/flow/manage/manage.vue'], resolve); } 
 			},
 			{ 
 				path: 'manage', 
