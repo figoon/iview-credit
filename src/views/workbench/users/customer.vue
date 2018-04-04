@@ -251,14 +251,14 @@
       getColumns () {
         if(columns.draft_columns.length < 6) {
           columns.draft_columns.splice(4,0,{
-            key: 'draft_type',
+            key: 'draftType',
             title: '客户类型',
             width: 150,
             render: (h, params) => {
               const row = params.row;
-              const type = row.draft_type === '1' ? 'primary' :  'success';
-              const text = row.draft_type === '1' ? '客户具体信息' : '贷款具体信息';
-              const icon = row.draft_type === '1' ? 'person-stalker' : 'card';
+              const type = row.draftType === '1' ? 'primary' :  'success';
+              const text = row.draftType === '1' ? '客户具体信息' : '贷款具体信息';
+              const icon = row.draftType === '1' ? 'person-stalker' : 'card';
               // 渲染自定义格式
               return h('div', [
                 h('Button', {
@@ -308,7 +308,8 @@
           cusName: search['cusName'],
           certificateType: search['certificateType'],
           certificateCode: search['certificateCode'],
-          positionTime: search['certificateType']}
+          positionTime: search['certificateType'],
+          draftType: '1'}
         })  
           .then((res) => {
             // 按状态处理返回结果
@@ -386,11 +387,11 @@
       },
       // 显示客户相关信息
       onShow (info) {
-        this.infoType = info.row.draft_type;
-        this.modelInfo.customer_name = info.row.cus_name;
-        this.modelInfo.customer_code = info.row.cus_no;
+        this.infoType = info.row.draftType;
+        this.modelInfo.customer_name = info.row.cusName;
+        this.modelInfo.customer_code = info.row.cusNo;
 
-        if(info.row.draft_type == '1') {
+        if(info.row.draftType == '1') {
           this.infos = infos.userInfos;
         } else {
           this.infos = infos.creditInfos;

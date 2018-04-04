@@ -43,7 +43,7 @@
                     <Upload
                       multiple
                       type="drag"
-                      action="//jsonplaceholder.typicode.com/posts/">
+                      action="/poc/bpm/deploy">
                       <div style="padding: 20px 0">
                         <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
                         <p>点击或者拖拽jar包到此</p>
@@ -205,29 +205,6 @@
         this.isAdd = true;
         this.modalDict = true;
       },
-      // 添加流程确定
-      onAddConfirm () {
-        this.$http.post('/poc/positon/creatPosition', {
-          orgNum: this.formFlow.orgNum,
-          orgName: this.formFlow.orgName,
-          positionPermission: this.formFlow.positionPermission,
-          procDefName: this.formFlow.procDefName,
-          organization: {
-            orgName: this.formFlow.orgName,
-            orgNum: this.formFlow.orgNum
-          },
-          userCd: this.formFlow.userCd
-        })
-          .then((res) => {
-            // 按状态处理返回结果
-						if(res.status == 200){
-              this.$Message.success(res.data.errmsg);
-              this.getFlowList(this.size, this.num);
-            }
-          }, (err) => {
-						this.$Message.error('连接服务器出错！');
-					})
-      },
       // 流程挂起
       onHalt (id) {
         this.$http.post('/poc/bpm/update/suspend?procDefId='+ id)
@@ -296,7 +273,7 @@
 </script>
 
 <style lang="less">
-  #i-user-manage {
+  #i-users-flow {
     .ivu-card {
       .ivu-card-extra {
         top: 10px;
